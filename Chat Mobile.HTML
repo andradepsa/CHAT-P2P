@@ -1,0 +1,2583 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>K10</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f4;
+    }
+    #root {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #007bff;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    .app-title {
+      margin: 0;
+      font-size: 24px;
+    }
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    .header-button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      position: relative;
+    }
+    .user-info-container {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .username {
+      font-weight: bold;
+      color: #333;
+    }
+    .user-edit-button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .user-name-form {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    .user-name-form input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      width: 200px;
+    }
+    .user-name-form button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .user-name-form button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .peer-id-container {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .peer-id-container button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .chat-main-container {
+      height: calc(100vh - 300px);
+    }
+    .chat-messages-container {
+      display: flex;
+      flex-direction: column;
+      background-color: white;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      height: 100%;
+    }
+    .chat-header {
+      padding: 10px 15px;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #eee;
+      border-top-left-radius: 5px;
+      border-top-right-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .chat-header-title {
+      font-weight: bold;
+      font-size: 16px;
+    }
+    .chat-header-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message-bubble {
+      max-width: 70%;
+      padding: 10px;
+      border-radius: 10px;
+      position: relative;
+      word-wrap: break-word;
+    }
+    .message-bubble.sent {
+      background-color: #007bff;
+      color: white;
+      align-self: flex-end;
+    }
+    .message-bubble.received {
+      background-color: #e9ecef;
+      color: #333;
+      align-self: flex-start;
+    }
+    .chat-user-bubble {
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .message-timestamp {
+      font-size: 10px;
+      color: #999;
+      margin-top: 5px;
+      text-align: right;
+    }
+    .file-link {
+      color: inherit;
+      text-decoration: underline;
+    }
+    .audio-player {
+      width: 200px;
+      margin-top: 5px;
+    }
+    .reply-private-button {
+      font-size: 10px;
+      background: none;
+      border: none;
+      color: #007bff;
+      cursor: pointer;
+      margin-top: 5px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .chat-input-container {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #eee;
+      gap: 10px;
+      align-items: center;
+    }
+    .voice-button {
+      padding: 8px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .voice-button.recording {
+      background-color: #ff5722;
+      animation: pulse 1s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    .voice-button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .chat-input-container button {
+      padding: 8px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-input-container button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .message-input-container {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .emoji-button {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      margin-right: 5px;
+    }
+    .message-input {
+      width: 100%;
+      padding: 8px 40px 8px 40px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+    }
+    .message-input:disabled {
+      background-color: #f4f4f4;
+      cursor: not-allowed;
+    }
+    .emoji-panel {
+      position: absolute;
+      bottom: 50px;
+      left: 0;
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      width: 300px;
+      max-height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+    .emoji-panel-header {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      font-weight: bold;
+    }
+    .emoji-panel-content {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10px;
+      overflow-y: auto;
+    }
+    .emoji-item {
+      font-size: 24px;
+      padding: 5px;
+      cursor: pointer;
+    }
+    .emoji-panel-footer {
+      padding: 5px 10px;
+      border-top: 1px solid #ddd;
+    }
+    .barra-rolagem-label {
+      font-size: 12px;
+      color: #666;
+    }
+    .contact-form {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .contact-form-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .contact-form input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      flex: 1;
+    }
+    .contact-form button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .connected-peers {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .peer-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    .peer-item:last-child {
+      border-bottom: none;
+    }
+    .peer-item button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 20px;
+      border-radius: 5px;
+      text-align: center;
+      margin: 20px;
+    }
+    .error-message button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .progress-container {
+      margin-top: 5px;
+    }
+    .progress-bar {
+      width: 100%;
+      background-color: #f0f0f0;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 5px;
+      background-color: #007bff;
+      transition: width: 0.3s ease;
+    }
+    .green-delete-icon {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      color: #28a745;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .green-delete-icon:hover {
+      color: #218838;
+    }
+    .video-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .video-player, .local-video-player {
+      width: 320px;
+      height: 240px;
+      background-color: #000;
+      border-radius: 5px;
+    }
+    .local-video-player {
+      border: 2px solid #007bff;
+    }
+    .video-label {
+      font-size: 14px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .audio-call-container {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .call-end-button {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .no-contact-selected {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      height: 100%;
+      color: #6c757d;
+    }
+    .no-contact-selected i {
+      font-size: 48px;
+      margin-bottom: 10px;
+    }
+    .contact-selector {
+      background-color: white;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+    }
+    .contact-selector select {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 3px;
+      margin-right: 10px;
+    }
+    .contact-selector button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    
+    /* Novos estilos para melhorar a experiência do usuário */
+    .connected-contact {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    
+    .contact-with-unread {
+      font-weight: bold;
+      color: #007bff;
+    }
+    
+    .chat-notification {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #f44336;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .online-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 5px;
+      border-radius: 50%;
+    }
+    
+    .online-indicator.online {
+      background-color: #4CAF50;
+    }
+    
+    .online-indicator.offline {
+      background-color: #999;
+    }
+    
+    body.dark-mode {
+      background-color: #121212;
+      color: #e0e0e0;
+    }
+    
+    .dark-mode .app-header {
+      background-color: #1f1f1f;
+    }
+    
+    .dark-mode .user-info-container,
+    .dark-mode .peer-id-container,
+    .dark-mode .contact-form,
+    .dark-mode .connected-peers,
+    .dark-mode .chat-messages-container,
+    .dark-mode .contact-selector,
+    .dark-mode .audio-call-container,
+    .dark-mode .video-container,
+    .dark-mode .chat-header {
+      background-color: #1e1e1e;
+      color: #e0e0e0;
+    }
+    
+    .dark-mode .message-bubble.received {
+      background-color: #2e2e2e;
+      color: #e0e0e0;
+    }
+    
+    .dark-mode .message-input {
+      background-color: #333;
+      color: #fff;
+      border: 1px solid #555;
+    }
+    
+    .dark-mode .emoji-panel {
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+    
+    .connection-status {
+      font-size: 12px;
+      margin-top: 5px;
+      color: #4CAF50;
+    }
+    
+    .reconnecting {
+      color: #ff9800;
+      animation: blink 1s infinite;
+    }
+    
+    @keyframes blink {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    
+    /* Novo indicador de modo servidor */
+    .server-mode-indicator {
+      display: inline-block;
+      background-color: #ff9800;
+      color: white;
+      font-size: 11px;
+      padding: 2px 5px;
+      border-radius: 3px;
+      margin-left: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.1/peerjs.min.js"></script>
+
+  <script type="text/babel">
+    console.log("Script started loading");
+
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    // PARTE 1: ErrorBoundary e gerenciamento de identificadores persistentes
+    class ErrorBoundary extends React.Component {
+      state = { error: null };
+
+      static getDerivedStateFromError(error) {
+        console.error("ErrorBoundary caught error:", error);
+        return { error };
+      }
+
+      render() {
+        if (this.state.error) {
+          return (
+            <div className="error-message">
+              <h1>Erro na aplicação</h1>
+              <p>{this.state.error.message}</p>
+              <p>Verifique o console do navegador para mais detalhes.</p>
+              <button onClick={() => window.location.reload()}>Tentar novamente</button>
+            </div>
+          );
+        }
+        return this.props.children;
+      }
+    }
+
+    const PEER_ID_STORAGE_KEY = 'p2pChatClientId';
+    const MESSAGES_STORAGE_KEY = 'p2pChatMessages';
+
+    const usePersistentId = () => {
+      const [peerId, setPeerId] = useState('');
+
+      const generateId = () => {
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        const buffer = new Uint8Array(6);
+        crypto.getRandomValues(buffer);
+        return Array.from(buffer)
+          .map(b => chars[b % chars.length])
+          .join('');
+      };
+
+      useEffect(() => {
+        console.log("usePersistentId: Loading or generating ID");
+        const loadOrGenerateId = () => {
+          const savedId = localStorage.getItem(PEER_ID_STORAGE_KEY);
+          if (savedId) {
+            console.log("usePersistentId: Loaded saved ID:", savedId);
+            setPeerId(savedId);
+          } else {
+            const newId = generateId();
+            console.log("usePersistentId: Generated new ID:", newId);
+            localStorage.setItem(PEER_ID_STORAGE_KEY, newId);
+            setPeerId(newId);
+          }
+        };
+        loadOrGenerateId();
+      }, []);
+
+      return [peerId, setPeerId];
+    };
+
+    // PARTE 2: Componente para gravação de voz
+    const VoiceRecorder = ({ onRecordingComplete, disabled, selectedContact }) => {
+      const [isRecording, setIsRecording] = useState(false);
+      const mediaRecorderRef = useRef(null);
+      const audioChunksRef = useRef([]);
+
+      const startRecording = async () => {
+        try {
+          console.log("VoiceRecorder: Starting recording");
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorderRef.current = new MediaRecorder(stream);
+
+          mediaRecorderRef.current.ondataavailable = (event) => {
+            if (event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+          };
+
+          mediaRecorderRef.current.onstop = () => {
+            if (audioChunksRef.current.length === 0) {
+              console.error("VoiceRecorder: No audio data collected");
+              return;
+            }
+
+            const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+            console.log("VoiceRecorder: Recording stopped, blob size:", audioBlob.size);
+            onRecordingComplete(audioBlob, selectedContact);
+            audioChunksRef.current = [];
+
+            stream.getTracks().forEach(track => track.stop());
+          };
+
+          audioChunksRef.current = [];
+          mediaRecorderRef.current.start(200);
+          setIsRecording(true);
+        } catch (err) {
+          console.error("VoiceRecorder: Error accessing microphone:", err);
+          alert('Erro ao acessar o microfone: ' + err.message);
+        }
+      };
+
+      const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+          try {
+            mediaRecorderRef.current.stop();
+            console.log("VoiceRecorder: Stopping recording");
+          } catch (err) {
+            console.error("VoiceRecorder: Error stopping media recorder:", err);
+          }
+          setIsRecording(false);
+        }
+      };
+
+      const toggleRecording = () => {
+        if (isRecording) {
+          stopRecording();
+        } else {
+          startRecording();
+        }
+      };
+
+      return (
+        <button
+          className={`voice-button ${isRecording ? 'recording' : ''}`}
+          onClick={toggleRecording}
+          disabled={disabled}
+          title="Gravar áudio"
+        >
+          <i className="fas fa-microphone button-icon"></i>
+        </button>
+      );
+    };
+
+    // PARTE 3: Tela de gerenciamento de contatos
+    const ContactsScreen = ({ contacts, setContacts, onBack, onSelectContact, connections }) => {
+      const [newName, setNewName] = useState('');
+      const [newPeerId, setNewPeerId] = useState('');
+      const [nameError, setNameError] = useState('');
+      const [idError, setIdError] = useState('');
+
+      const validateForm = () => {
+        let isValid = true;
+
+        if (!newName.trim()) {
+          setNameError('Nome é obrigatório');
+          isValid = false;
+        } else {
+          setNameError('');
+        }
+
+        if (!newPeerId.trim()) {
+          setIdError('ID é obrigatório');
+          isValid = false;
+        } else {
+          setIdError('');
+        }
+
+        return isValid;
+      };
+
+      const handleAddContact = (e) => {
+        e.preventDefault();
+
+        if (validateForm()) {
+          const newContact = { name: newName, peerId: newPeerId };
+          console.log("ContactsScreen: Adding contact:", newContact);
+          setContacts(prev => {
+            const updated = [...prev, newContact];
+            localStorage.setItem('p2pContacts', JSON.stringify(updated));
+            return updated;
+          });
+          setNewName('');
+          setNewPeerId('');
+        }
+      };
+
+      const handleRemoveContact = (peerId, e) => {
+        e.stopPropagation();
+        console.log("ContactsScreen: Removing contact with peerId:", peerId);
+        setContacts(prev => {
+          const updated = prev.filter(c => c.peerId !== peerId);
+          localStorage.setItem('p2pContacts', JSON.stringify(updated));
+          return updated;
+        });
+      };
+
+      return (
+        <div>
+          <button onClick={onBack} style={{ marginBottom: '20px' }}>
+            ← Voltar
+          </button>
+          <h2>Lista de Contatos</h2>
+
+          <form className="contact-form" onSubmit={handleAddContact}>
+            <div className="contact-form-row" style={{ flexDirection: 'column', gap: '10px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <input
+                  type="text"
+                  placeholder="Nome do contato"
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
+                  style={{ borderColor: nameError ? 'red' : '#ddd' }}
+                />
+                {nameError && <span style={{ color: 'red', fontSize: '12px' }}>{nameError}</span>}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                <input
+                  type="text"
+                  placeholder="ID do contato"
+                  value={newPeerId}
+                  onChange={(e) => setNewPeerId(e.target.value)}
+                  style={{ borderColor: idError ? 'red' : '#ddd' }}
+                />
+                {idError && <span style={{ color: 'red', fontSize: '12px' }}>{idError}</span>}
+              </div>
+
+              <button type="submit" style={{ marginTop: '10px' }}>Adicionar</button>
+            </div>
+          </form>
+
+          <div className="connected-peers contacts-list">
+            {contacts.length === 0 ? (
+              <p>Nenhum contato adicionado ainda.</p>
+            ) : (
+              contacts.map((contact, i) => {
+                const isConnected = connections.some(c => c.peer === contact.peerId && c.open);
+                
+                return (
+                  <div
+                    key={i}
+                    className={`peer-item ${isConnected ? 'connected-contact' : ''}`}
+                    onClick={() => onSelectContact(contact.peerId)}
+                  >
+                    <span style={{ flex: 1 }}>
+                      <span className={`online-indicator ${isConnected ? 'online' : 'offline'}`}></span>
+                      {contact.name} - {contact.peerId} {isConnected && <span style={{ color: '#4CAF50' }}>✓</span>}
+                    </span>
+                    <button
+                      onClick={(e) => handleRemoveContact(contact.peerId, e)}
+                      style={{ marginLeft: '10px' }}
+                    >
+🗑️
+                    </button>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      );
+    };
+
+    // PARTE 4: Gerenciador de chat (Versão modificada sem lista de conversas)
+    const UpdatedChatManager = ({
+      connections,
+      messages,
+      setMessages,
+      contacts,
+      userName,
+      peerId,
+      activeCalls,
+      endCall,
+      startVoiceCall,
+      toggleVideoCall,
+      remoteStreams,
+      audioRefs,
+      videoRefs,
+      handleFileChange,
+      fileInputRef,
+      handleAudioRecording,
+      newMessage,
+      setNewMessage,
+      showEmojiPanel,
+      setShowEmojiPanel,
+      populateEmojiPanel,
+      getContactName,
+      selectedContact,
+      setSelectedContact,
+      localVideoRef,
+      unreadMessages,
+      setUnreadMessages,
+      setShowContacts,
+      connectedToServer,
+      serverPeerId  // Importante: recebendo serverPeerId como prop
+    }) => {
+      const messagesEndRef = useRef(null);
+
+      const formatTime = (date) => {
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        const seconds = date.getSeconds().toString().padStart(2, '0');
+        return `${hours}:${minutes}:${seconds}`;
+      };
+
+      const filteredMessages = useMemo(() => {
+        if (selectedContact) {
+          return messages.filter(msg =>
+            (msg.sender === selectedContact && msg.recipient === 'you') ||
+            (msg.sender === 'you' && msg.recipient === selectedContact)
+          );
+        }
+        return [];
+      }, [messages, selectedContact]);
+
+      const sendDirectMessage = () => {
+        if (!userName.trim()) {
+          alert('Por favor, defina seu nome antes de enviar mensagens');
+          return;
+        }
+
+        if (!newMessage.trim() || !selectedContact) {
+          console.log("UpdatedChatManager: Cannot send message: no text or no selected contact");
+          return;
+        }
+
+        const conn = connections.find(c => c.peer === selectedContact);
+        if (!conn) {
+          alert(`Contato ${getContactName(selectedContact)} não está conectado no momento.`);
+          return;
+        }
+
+        try {
+          const timestamp = new Date();
+          conn.send({
+            type: 'message',
+            text: newMessage,
+            senderName: userName,
+            direct: true,
+            time: formatTime(timestamp)
+          });
+
+          const newMessageObj = {
+            text: newMessage,
+            sender: 'you',
+            recipient: selectedContact,
+            senderName: userName,
+            time: formatTime(timestamp),
+            type: 'text',
+            direct: true,
+            timestamp: timestamp.getTime()
+          };
+
+          setMessages(prev => {
+            const updated = [...prev, newMessageObj];
+            localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+            return updated;
+          });
+
+          setNewMessage('');
+        } catch (err) {
+        console.error("UpdatedChatManager: Error sending direct message:", err);
+alert(`Erro ao enviar mensagem: ${err.message}`);
+        }
+      };
+
+      const handleSendMessage = () => {
+        if (selectedContact) {
+          sendDirectMessage();
+        }
+      };
+
+      const deleteMessage = (messageTimestamp) => {
+        setMessages(prev => {
+          const updated = prev.filter(msg => msg.timestamp !== messageTimestamp);
+          localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+          return updated;
+        });
+      };
+
+      const deleteMessagesByContact = (peerId) => {
+        setMessages(prev => {
+          const updated = prev.filter(
+            msg =>
+              !(
+                (msg.sender === peerId && msg.recipient === 'you') ||
+                (msg.sender === 'you' && msg.recipient === peerId)
+              )
+          );
+          localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+          return updated;
+        });
+      };
+
+      useEffect(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      }, [filteredMessages]);
+
+      useEffect(() => {
+        remoteStreams.forEach(({ peerId, stream, type }) => {
+          if (type === 'voice') {
+            const audioElement = audioRefs.current[peerId];
+            if (audioElement && audioElement.srcObject !== stream) {
+              console.log("UpdatedChatManager: Assigning audio stream for peer:", peerId);
+              audioElement.srcObject = stream;
+              audioElement.play().catch(e => console.warn("Audio play failed:", e));
+            }
+          } else if (type === 'video') {
+            const videoElement = videoRefs.current[peerId];
+            if (videoElement && videoElement.srcObject !== stream) {
+              console.log("UpdatedChatManager: Assigning video stream for peer:", peerId);
+              videoElement.srcObject = stream;
+              videoElement.play().catch(e => console.warn("Video play failed:", e));
+            }
+          }
+        });
+        return () => {
+          Object.values(audioRefs.current).forEach(audio => { if (audio) audio.srcObject = null; });
+          Object.values(videoRefs.current).forEach(video => { if (video) video.srcObject = null; });
+        };
+      }, [remoteStreams]);
+
+      // Se nenhum contato estiver selecionado, mostra uma interface melhorada com lista de contatos online
+      if (!selectedContact) {
+        const onlineContacts = connections.filter(conn => conn.open);
+        
+        return (
+          <div className="chat-main-container">
+            <div className="chat-messages-container">
+              <div className="no-contact-selected">
+                <i className="fas fa-comments"></i>
+                <p>{onlineContacts.length > 0 ? 'Selecione um contato para iniciar uma conversa' : 'Nenhum contato online no momento'}</p>
+                <div style={{ margin: "20px 0", width: "80%", maxWidth: "400px" }}>
+                  {onlineContacts.length > 0 && (
+                    <>
+                      <h4>Contatos Online</h4>
+                      <div style={{ marginBottom: "20px" }}>
+                        {onlineContacts.map((conn, index) => {
+                          const hasUnread = unreadMessages[conn.peer] && unreadMessages[conn.peer] > 0;
+                          return (
+                            <div 
+                              key={index}
+                              style={{
+                                padding: "10px",
+                                marginBottom: "5px",
+                                borderRadius: "5px",
+                                backgroundColor: "#f8f9fa",
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                cursor: "pointer",
+                                position: "relative",
+                                fontWeight: hasUnread ? "bold" : "normal"
+                              }}
+                              onClick={() => {
+                                setSelectedContact(conn.peer);
+                                if (hasUnread) {
+                                  setUnreadMessages(prev => ({
+                                    ...prev,
+                                    [conn.peer]: 0
+                                  }));
+                                }
+                              }}
+                            >
+                              <div>
+                                <span className="online-indicator online"></span>
+                                {getContactName(conn.peer)}
+                                {conn.peer === serverPeerId && (
+                                  <span className="server-mode-indicator">SERVIDOR</span>
+                                )}
+                              </div>
+                              {hasUnread && (
+                                <span 
+                                  style={{
+                                    backgroundColor: "#f44336",
+                                    color: "white",
+                                    borderRadius: "50%",
+                                    width: "24px",
+                                    height: "24px",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    fontSize: "12px"
+                                  }}
+                                >
+                                  {unreadMessages[conn.peer]}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </>
+                  )}
+                  
+                  <button 
+                    onClick={() => setShowContacts(true)} 
+                    style={{ 
+                      marginTop: "10px", 
+                      padding: "8px 15px", 
+                      backgroundColor: "#007bff", 
+                      color: "white", 
+                      border: "none", 
+                      borderRadius: "5px",
+                      width: "100%"
+                    }}
+                  >
+                    Gerenciar Contatos
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // Verifica se há chamadas ativas com o contato selecionado
+      const hasActiveVoiceCallWithPeer = activeCalls.some(c => c.peerId === selectedContact && c.type === 'voice');
+      const hasActiveVideoCallWithPeer = activeCalls.some(c => c.peerId === selectedContact && c.type === 'video' && c.localStream);
+      const isContactOnline = connections.some(c => c.peer === selectedContact && c.open);
+
+      return (
+        <div className="chat-main-container">
+          <div className="chat-messages-container">
+            <div className="chat-header">
+              <div className="chat-header-title">
+                <span className={`online-indicator ${isContactOnline ? 'online' : 'offline'}`}></span>
+                {getContactName(selectedContact)} {isContactOnline ? "(online)" : "(offline)"}
+                {connectedToServer && selectedContact === serverPeerId && (
+                  <span className="server-mode-indicator">SERVIDOR</span>
+                )}
+              </div>
+              <div className="chat-header-actions">
+                {hasActiveVoiceCallWithPeer ? (
+                  <button
+                    onClick={() => endCall(selectedContact, 'voice')}
+                    style={{ padding: '4px', background: '#ff5722', width: '30px', height: '30px', borderRadius: '50%' }}
+                    title="Encerrar chamada de voz"
+                  >
+                    <i className="fas fa-phone-slash"></i>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => startVoiceCall(selectedContact)}
+                    style={{ 
+                      padding: '4px', 
+                      background: isContactOnline ? '#4CAF50' : '#ccc', 
+                      width: '30px', 
+                      height: '30px', 
+                      borderRadius: '50%' 
+                    }}
+                    title={isContactOnline ? "Iniciar chamada de voz" : "Contato offline"}
+                    disabled={!isContactOnline}
+                  >
+                    <i className="fas fa-phone"></i>
+                  </button>
+                )}
+                <button
+                  onClick={() => toggleVideoCall(selectedContact)}
+                  style={{
+                    padding: '4px',
+                    background: hasActiveVideoCallWithPeer ? '#ff5722' : (isContactOnline ? '#4CAF50' : '#ccc'),
+                    width: '30px',
+                    height: '30px',
+                    borderRadius: '50%',
+                  }}
+                  title={
+                    hasActiveVideoCallWithPeer 
+                      ? "Desligar Câmera" 
+                      : (isContactOnline ? "Ligar Câmera" : "Contato offline")
+                  }
+                  disabled={!isContactOnline && !hasActiveVideoCallWithPeer}
+                >
+                  <i className={`fas ${hasActiveVideoCallWithPeer ? 'fa-video-slash' : 'fa-video'}`}></i>
+                </button>
+                <button
+                  onClick={() => deleteMessagesByContact(selectedContact)}
+                  style={{ padding: '4px', background: '#28a745', width: '30px', height: '30px', borderRadius: '50%' }}
+                  title="Apagar todas as mensagens"
+                >
+                  <i className="fas fa-trash"></i>
+                </button>
+                <button
+                  onClick={() => setSelectedContact(null)}
+                  style={{ padding: '4px', background: '#6c757d', width: '30px', height: '30px', borderRadius: '50%' }}
+                  title="Voltar à seleção de contatos"
+                >
+                  <i className="fas fa-arrow-left"></i>
+                </button>
+              </div>
+            </div>
+            <div className="chat-messages">
+              {filteredMessages.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#6c757d', margin: '20px' }}>
+                  <p>Nenhuma mensagem trocada ainda. Envie uma mensagem para iniciar a conversa.</p>
+                </div>
+              ) : (
+                filteredMessages.map((msg, i) => (
+                  <div key={msg.timestamp || i} className={`message-bubble ${msg.sender === 'you' ? 'sent' : 'received'}`}>
+                    <div className="chat-user-bubble">
+                      {msg.sender === 'you' ? userName : getContactName(msg.sender)}
+                    </div>
+                    {msg.type === 'text' ? (
+                      <div>{msg.text}</div>
+                    ) : msg.type === 'file' ? (
+                      <div>
+                        {msg.fileData ? (
+                          <a href={msg.fileData} download={msg.fileName} className="file-link">
+                            {msg.fileName}
+                          </a>
+                        ) : (
+                          <span>{msg.fileName}</span>
+                        )}
+                        {(msg.receiving || msg.sending) && (
+                          <div className="progress-container">
+                            <div className="progress-bar">
+                              <div className="progress" style={{ width: `${msg.progress}%` }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : msg.type === 'audio' && (
+                      <div>
+                        {msg.audioData ? (
+                          <audio controls src={msg.audioData} className="audio-player" />
+                        ) : (
+                          <span>Áudio</span>
+                        )}
+                        {(msg.receiving || msg.sending) && (
+                          <div className="progress-container">
+                            <div className="progress-bar">
+                              <div className="progress" style={{ width: `${msg.progress}%` }} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                    <div className="message-timestamp">{msg.time}</div>
+                    <div
+                      className="green-delete-icon"
+                      onClick={() => deleteMessage(msg.timestamp)}
+                      title="Remover mensagem"
+                    >
+                      <i className="fas fa-trash"></i>
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+            <div className="chat-input-container">
+              <VoiceRecorder
+                onRecordingComplete={handleAudioRecording}
+                disabled={!selectedContact || !isContactOnline}
+                selectedContact={selectedContact}
+              />
+              <button
+                onClick={() => fileInputRef.current.click()}
+                disabled={!selectedContact || !isContactOnline}
+                title={isContactOnline ? "Enviar arquivo" : "Contato offline"}
+              >
+                <i className="fas fa-paperclip"></i>
+              </button>
+              <div className="message-input-container">
+                <button
+                  className="emoji-button"
+                  onClick={() => setShowEmojiPanel(!showEmojiPanel)}
+                  title="Emojis"
+                  disabled={!selectedContact || !isContactOnline}
+                >
+                  😊
+                </button>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder={
+                    isContactOnline
+                      ? `Mensagem para ${getContactName(selectedContact)}...`
+                      : "Contato offline"
+                  }
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter' && selectedContact && isContactOnline) {
+                      handleSendMessage();
+                    }
+                  }}
+                  className="message-input"
+                  disabled={!selectedContact || !isContactOnline}
+                />
+                {showEmojiPanel && populateEmojiPanel()}
+              </div>
+              <button
+                onClick={handleSendMessage}
+                disabled={
+                  !newMessage.trim() ||
+                  !selectedContact ||
+                  !isContactOnline
+                }
+                title={isContactOnline ? "Enviar mensagem" : "Contato offline"}
+              >
+                <i className="fas fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // PARTE 5: Componente Principal App
+    const App = () => {
+      useEffect(() => {
+        if (localStorage.getItem('modo') === 'dark') {
+          document.body.classList.add('dark-mode');
+          const btn = document.getElementById('darkModeBtn');
+          if (btn) btn.textContent = '☀️';
+        }
+      }, []);
+
+      const toggleDarkMode = () => {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        localStorage.setItem('modo', isDark ? 'dark' : 'light');
+        const btn = document.getElementById('darkModeBtn');
+        if (btn) btn.textContent = isDark ? '☀️' : '🌙';
+      };
+
+      console.log("App: Component rendering");
+      const [peerId, setPeerId] = usePersistentId();
+      const [userName, setUserName] = useState(() => localStorage.getItem('p2pUserName') || '');
+      const [editingName, setEditingName] = useState(!localStorage.getItem('p2pUserName'));
+      const [connections, setConnections] = useState([]);
+      const [messages, setMessages] = useState(() => {
+        const saved = localStorage.getItem(MESSAGES_STORAGE_KEY);
+        try {
+          const parsed = saved ? JSON.parse(saved) : [];
+          return parsed.map((msg, index) => ({ ...msg, timestamp: msg.timestamp || Date.now() + index }));
+        } catch (err) {
+          console.error("Error parsing saved messages:", err);
+          localStorage.removeItem(MESSAGES_STORAGE_KEY);
+          return [];
+        }
+      });
+      const [newMessage, setNewMessage] = useState('');
+      const [showContacts, setShowContacts] = useState(false);
+      const [contacts, setContacts] = useState(() => {
+        const saved = localStorage.getItem('p2pContacts');
+        try { return saved ? JSON.parse(saved) : []; }
+        catch(e) { return []; }
+      });
+      const [activeCalls, setActiveCalls] = useState([]);
+      const [remoteStreams, setRemoteStreams] = useState([]);
+      const [error, setError] = useState(null);
+      const [isLocalVideoVisible, setIsLocalVideoVisible] = useState(false);
+      const [showEmojiPanel, setShowEmojiPanel] = useState(false);
+      const [selectedContact, setSelectedContact] = useState(null);
+      const [isPeerInitialized, setIsPeerInitialized] = useState(false);
+      // Novo estado para rastrear mensagens não lidas
+      const [unreadMessages, setUnreadMessages] = useState({});
+      // Estado para reconexões
+      const [reconnecting, setReconnecting] = useState({});
+      // Estado para mostrar conexões ativas
+      const [activeConnections, setActiveConnections] = useState({});
+      
+      // NOVOS ESTADOS para gerenciar conexão com servidor
+      const [connectedToServer, setConnectedToServer] = useState(false);
+      const [serverPeerId, setServerPeerId] = useState(null);
+
+      const peerInstance = useRef(null);
+      const fileInputRef = useRef(null);
+      const pendingFiles = useRef({});
+      const audioRefs = useRef({});
+      const videoRefs = useRef({});
+      const localVideoRef = useRef(null);
+      const localStreamsRef = useRef(new Map());
+      const CHUNK_SIZE = 16 * 1024;
+      
+      // Função para verificar e tentar reconectar contatos
+      const checkConnections = () => {
+        if (!peerInstance.current || !isPeerInitialized) return;
+        
+        contacts.forEach(contact => {
+          const conn = connections.find(c => c.peer === contact.peerId);
+          if (!conn || !conn.open) {
+            if (!reconnecting[contact.peerId]) {
+              console.log("App: Attempting to reconnect to:", contact.peerId);
+              setReconnecting(prev => ({ ...prev, [contact.peerId]: true }));
+              connectToPeer(contact.peerId, true);
+            }
+          }
+        });
+      };
+      
+      // Verificar conexões a cada 30 segundos
+      useEffect(() => {
+        const intervalId = setInterval(checkConnections, 30000);
+        return () => clearInterval(intervalId);
+      }, [connections, contacts, reconnecting]);
+
+      const stopAndRemoveLocalStream = (peerId) => {
+        const stream = localStreamsRef.current.get(peerId);
+        if (stream) {
+          stream.getTracks().forEach(track => track.stop());
+          localStreamsRef.current.delete(peerId);
+          console.log(`App: Stopped and removed local stream for call with ${peerId}`);
+          if (localStreamsRef.current.size === 0) {
+            setIsLocalVideoVisible(false);
+            if (localVideoRef.current) localVideoRef.current.srcObject = null;
+          } else {
+            const firstActiveStream = localStreamsRef.current.values().next().value;
+            if (localVideoRef.current && firstActiveStream) {
+              localVideoRef.current.srcObject = firstActiveStream;
+            }
+          }
+        }
+      };
+
+      // Função para tratar a configuração de conexões recebidas
+      const setupConnectionHandlers = (conn) => {
+        conn.on('open', () => {
+          console.log("PeerJS: Data connection opened with:", conn.peer);
+          setConnections(prev => [...prev.filter(c => c.peer !== conn.peer), conn]);
+          setReconnecting(prev => ({ ...prev, [conn.peer]: false }));
+          setActiveConnections(prev => ({ ...prev, [conn.peer]: true }));
+          
+          // Só selecionar o contato automaticamente se for o servidor ou se nenhum contato estiver selecionado
+          if (!selectedContact) {
+            setSelectedContact(conn.peer);
+            setShowContacts(false);
+          }
+        });
+
+        conn.on('data', (data) => {
+          console.log("PeerJS: Received data from:", conn.peer, data);
+          
+          // Verificar se é uma mensagem de informação do servidor
+          if (data.type === 'server-info' && data.isServer) {
+            console.log("Connected to a K10 server in pure server mode");
+            setConnectedToServer(true);
+            setServerPeerId(conn.peer);
+          }
+          
+          // Marcar mensagens como não lidas quando o remetente não é o contato selecionado
+          if (data.type === 'message' && selectedContact !== conn.peer) {
+            setUnreadMessages(prev => ({
+              ...prev,
+              [conn.peer]: (prev[conn.peer] || 0) + 1
+            }));
+          }
+          
+          handleIncomingData(data, conn.peer);
+        });
+
+        conn.on('close', () => {
+          console.log("PeerJS: Data connection closed with:", conn.peer);
+          setConnections(prev => prev.filter(c => c.peer !== conn.peer));
+          setActiveConnections(prev => ({ ...prev, [conn.peer]: false }));
+          
+          // Se esta era nossa conexão com o servidor, atualizar o estado
+          if (serverPeerId === conn.peer) {
+            setConnectedToServer(false);
+            setServerPeerId(null);
+          }
+          
+          endCall(conn.peer, 'video');
+          endCall(conn.peer, 'voice');
+          
+          // Se o contato fechado for o selecionado, limpar a seleção
+          if (selectedContact === conn.peer) {
+            setSelectedContact(null);
+          }
+        });
+
+        conn.on('error', (err) => {
+          console.error("PeerJS: Data connection error with:", conn.peer, err);
+          setConnections(prev => prev.filter(c => c.peer !== conn.peer));
+          setActiveConnections(prev => ({ ...prev, [conn.peer]: false }));
+          
+          // Se esta era nossa conexão com o servidor, atualizar o estado
+          if (serverPeerId === conn.peer) {
+            setConnectedToServer(false);
+            setServerPeerId(null);
+          }
+          
+          endCall(conn.peer, 'video');
+          endCall(conn.peer, 'voice');
+          
+          // Se o contato com erro for o selecionado, limpar a seleção
+          if (selectedContact === conn.peer) {
+            setSelectedContact(null);
+          }
+        });
+      };
+
+      useEffect(() => {
+        if (!peerId) return;
+        console.log("App: Initializing PeerJS with ID:", peerId);
+        const peer = new Peer(peerId, {
+          host: '0.peerjs.com', 
+          port: 443, 
+          secure: true,
+          config: { 
+            iceServers: [
+              // Google STUN servers
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' },
+              { urls: 'stun:stun4.l.google.com:19302' },
+              
+              // Mais servidores Google
+              { urls: 'stun:stun.google.com:19302' },
+              { urls: 'stun:stun-1.google.com:19302' },
+              { urls: 'stun:stun-2.google.com:19302' },
+              { urls: 'stun:stun-3.google.com:19302' },
+              { urls: 'stun:stun-4.google.com:19302' },
+              
+              // Servidores Google regionais
+              { urls: 'stun:stun-us-west-1.google.com:19302' },
+              { urls: 'stun:stun-us-east-1.google.com:19302' },
+              { urls: 'stun:stun-us-central-1.google.com:19302' },
+              { urls: 'stun:stun-us-south-1.google.com:19302' },
+              { urls: 'stun:stun-eu-west-1.google.com:19302' },
+              { urls: 'stun:stun-eu-central-1.google.com:19302' },
+              { urls: 'stun:stun-asia-east-1.google.com:19302' },
+              { urls: 'stun:stun-asia-northeast-1.google.com:19302' },
+              { urls: 'stun:stun-asia-south-1.google.com:19302' },
+              { urls: 'stun:stun-asia-southeast-1.google.com:19302' },
+              
+              { urls: 'stun:stun.ekiga.net:3478' },
+              { urls: 'stun:stun.ideasip.com:3478' },
+              { urls: 'stun:stun.schlund.de:3478' },
+              { urls: 'stun:stun.voiparound.com:3478' },
+              { urls: 'stun:stun.voipbuster.com:3478' },
+              { urls: 'stun:stun.voipstunt.com:3478' },
+              { urls: 'stun:stun.voxgratia.org:3478' },
+              { urls: 'stun:stun.services.mozilla.com:3478' },
+              { urls: 'stun:stun.stunprotocol.org:3478' },
+              { urls: 'stun:stun.counterpath.com:3478' },
+            ],
+            sdpSemantics: 'unified-plan',
+            iceTransportPolicy: 'all',
+            bundlePolicy: 'max-bundle',
+            rtcpMuxPolicy: 'require',
+            iceCandidatePoolSize: 10
+          },
+          debug: 2
+        });
+        
+        peer.on('open', (id) => {
+          console.log("PeerJS: Connected with ID:", id);
+          setIsPeerInitialized(true);
+          // Tentar conectar com todos os contatos ao inicializar
+          setTimeout(() => {
+            contacts.forEach(contact => {
+              connectToPeer(contact.peerId, true);
+            });
+          }, 1000);
+        });
+
+        peer.on('error', (err) => {
+          console.error("PeerJS: Error:", err);
+          if (err.type === 'unavailable-id') {
+            console.log("PeerJS: ID unavailable, generating new ID...");
+            const newId = generateNewId();
+            localStorage.setItem(PEER_ID_STORAGE_KEY, newId);
+            window.location.reload();
+          } else if (err.type === 'peer-unavailable') {
+            console.log("PeerJS: Peer unavailable, user is likely offline");
+            const peerIdFromError = err.message.split(' ')[1]; // Extrai o ID do erro
+            if (peerIdFromError) {
+              setReconnecting(prev => ({ ...prev, [peerIdFromError]: false }));
+            }
+          } else {
+            setError(`Erro PeerJS: ${err.type}`);
+          }
+        });
+
+        // MODIFICAÇÃO IMPORTANTE: Gerenciador de conexão atualizado para lidar com modo servidor
+        peer.on('connection', (conn) => {
+          console.log("PeerJS: Incoming data connection from:", conn.peer);
+          
+          // Só aceitar conexões do servidor ou se não estiver conectado a um servidor
+          if (serverPeerId === conn.peer || !connectedToServer) {
+            console.log("App: Connection is from our server or we're not connected to a server yet");
+            setupConnectionHandlers(conn);
+          } else {
+            console.log("App: Rejecting connection from " + conn.peer + " because we're in server mode");
+            
+            // Notificar o peer que estamos rejeitando a conexão
+            try {
+              conn.on('open', () => {
+                conn.send({
+                  type: 'message',
+                  text: 'Conexão rejeitada: Este cliente está em modo servidor e só aceita conexões do servidor',
+                  senderName: userName || 'Sistema',
+                  direct: true,
+                  time: formatTime(new Date())
+                });
+                
+                // Fechar a conexão após enviar a mensagem
+                setTimeout(() => {
+                  conn.close();
+                }, 1000);
+              });
+            } catch (err) {
+              console.error("Error notifying rejected connection:", err);
+              conn.close();
+            }
+          }
+        });
+
+        // MODIFICAÇÃO: Código modificado para corrigir a webcam
+        peer.on('call', async (call) => {
+          const callType = call.metadata?.type || 'video';
+          console.log(`PeerJS: Receiving ${callType} call from:`, call.peer);
+
+          // Só aceitar chamadas do servidor ou de contatos permitidos no modo sem servidor
+          if (serverPeerId === call.peer || !connectedToServer) {
+            try {
+              console.log(`PeerJS: Answering ${callType} call from:`, call.peer);
+              
+              // Para chamadas de vídeo, solicitamos permissão para acessar a câmera
+              let localStream = null;
+              if (callType === 'video') {
+                try {
+                  localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+                  if (localStream) {
+                    localStreamsRef.current.set(call.peer + '_' + callType, localStream);
+                    setIsLocalVideoVisible(true);
+                    if (localVideoRef.current) {
+                      localVideoRef.current.srcObject = localStream;
+                      localVideoRef.current.play().catch(e => console.warn("Local video play failed:", e));
+                    }
+                  }
+                } catch (err) {
+                  console.warn("Could not get local camera/mic:", err);
+                  // Still answer the call, but without sending our video
+                }
+              } else if (callType === 'voice') {
+                try {
+                  localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                  if (localStream) {
+                    localStreamsRef.current.set(call.peer + '_' + callType, localStream);
+                  }
+                } catch (err) {
+                  console.warn("Could not get local mic:", err);
+                  // Still answer the call, but without sending our audio
+                }
+              }
+              
+              // Answer the call with our stream (or null if we couldn't get one)
+              call.answer(localStream);
+
+              // Selecionar automaticamente o contato que está chamando
+              if (selectedContact !== call.peer) {
+                setSelectedContact(call.peer);
+                setShowContacts(false);
+              }
+
+              setActiveCalls(prev => [
+                ...prev.filter(c => !(c.peerId === call.peer && c.type === callType)),
+                {
+                  peerId: call.peer,
+                  call,
+                  localStream: localStream,
+                  type: callType,
+                  direction: 'incoming',
+                  isTemporaryStream: false
+                }
+              ]);
+
+              call.on('stream', (remoteStream) => {
+                console.log(`PeerJS: Received remote ${callType} stream from:`, call.peer);
+                setRemoteStreams(prev => [
+                  ...prev.filter(s => !(s.peerId === call.peer && s.type === callType)),
+                  { peerId: call.peer, stream: remoteStream, type: callType }
+                ]);
+                
+                if (callType === 'video') {
+                  const videoElement = videoRefs.current[call.peer];
+                  if (videoElement) {
+                    videoElement.srcObject = remoteStream;
+                    videoElement.play().catch(e => console.warn("Remote video play failed:", e));
+                  }
+                } else if (callType === 'voice') {
+                  const audioElement = audioRefs.current[call.peer];
+                  if (audioElement) {
+                    audioElement.srcObject = remoteStream;
+                    audioElement.play().catch(e => console.warn("Audio play failed:", e));
+                  }
+                }
+              });
+
+              call.on('close', () => {
+                console.log(`PeerJS: Incoming ${callType} call closed with:`, call.peer);
+                endCall(call.peer, callType);
+              });
+
+              call.on('error', (err) => {
+                console.error(`PeerJS: Error in incoming ${callType} call:`, err);
+                endCall(call.peer, callType);
+              });
+
+            } catch (err) {
+              console.error(`PeerJS: Error handling incoming ${callType} call:`, err);
+              call.close();
+              alert('Erro ao acessar câmera/microfone: ' + err.message);
+            }
+          } else {
+            console.log(`App: Rejecting ${callType} call from ${call.peer} because we're in server mode`);
+            call.close();
+          }
+        });
+
+        peerInstance.current = peer;
+
+        return () => {
+          console.log("App: Cleaning up PeerJS connection and all streams");
+          if (peerInstance.current) {
+            peerInstance.current.destroy();
+            peerInstance.current = null;
+          }
+          localStreamsRef.current.forEach((stream, peerId) => {
+            stream.getTracks().forEach(track => track.stop());
+            console.log(`App Cleanup: Stopped local stream for ${peerId}`);
+          });
+          localStreamsRef.current.clear();
+          setActiveCalls([]);
+          setRemoteStreams([]);
+          setIsLocalVideoVisible(false);
+          if (localVideoRef.current) localVideoRef.current.srcObject = null;
+          setIsPeerInitialized(false);
+          
+          // Limpar estado de conexão com servidor
+          setConnectedToServer(false);
+          setServerPeerId(null);
+        };
+      }, [peerId]);
+
+      const generateNewId = () => {
+        const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+        const buffer = new Uint8Array(6);
+        crypto.getRandomValues(buffer);
+        return Array.from(buffer).map(b => chars[b % chars.length]).join('');
+      };
+
+      const getContactName = (pId) => contacts.find(c => c.peerId === pId)?.name || pId;
+
+      const saveUserName = () => {
+        if (userName.trim()) {
+          localStorage.setItem('p2pUserName', userName);
+          setEditingName(false);
+        }
+      };
+
+      const formatTime = (date) => date.toLocaleTimeString('pt-BR');
+
+      // Função melhorada para conectar a um peer
+      const connectToPeer = (peerIdToConnect, silent = false) => {
+        if (!peerIdToConnect || !peerInstance.current || !isPeerInitialized) {
+          if (!silent) alert("Erro: Peer não inicializado ou ID inválido");
+          return;
+        }
+        
+        // Se já estiver conectado, apenas seleciona o contato
+        const existingConn = connections.find(conn => conn.peer === peerIdToConnect && conn.open);
+        if (existingConn) {
+          console.log("App: Already connected to", peerIdToConnect);
+          setSelectedContact(peerIdToConnect);
+          return;
+        }
+
+        console.log("App: Attempting to connect to peer:", peerIdToConnect);
+        try {
+          const conn = peerInstance.current.connect(peerIdToConnect, { reliable: true });
+          if (!conn) {
+            throw new Error("Não foi possível criar a conexão");
+          }
+
+          // Estamos iniciando esta conexão, então tratar através de nosso handler de conexão
+          setupConnectionHandlers(conn);
+        } catch (err) {
+          console.error("App: Error establishing data connection:", err);
+          setReconnecting(prev => ({ ...prev, [peerIdToConnect]: false }));
+          if (!silent) {
+            alert(`Erro ao conectar com ${getContactName(peerIdToConnect)}: ${err.message || 'Contato offline ou ID inválido'}`);
+          }
+        }
+      };
+
+      const handleIncomingData = (data, pId) => {
+        console.log("App: Processing incoming data of type:", data.type, "from", pId);
+        const timestamp = data.timestamp || Date.now();
+        const messageTime = data.time || formatTime(new Date(timestamp));
+        const baseMessage = {
+          sender: pId,
+          senderName: data.senderName || getContactName(pId),
+          time: messageTime,
+          direct: data.direct || false,
+          timestamp: timestamp,
+          recipient: data.direct ? 'you' : undefined
+        };
+
+        let messageToAdd = null;
+
+        if (data.type === 'message') {
+          messageToAdd = { ...baseMessage, text: data.text, type: 'text' };
+        } else if (data.type === 'file-start') {
+          pendingFiles.current[data.fileId] = {
+            fileName: data.fileName,
+            chunks: new Uint8Array(data.fileSize),
+            receivedBytes: 0,
+            totalSize: data.fileSize,
+            fileType: data.fileType
+          };
+          messageToAdd = { ...baseMessage, fileId: data.fileId, fileName: data.fileName, type: 'file', receiving: true, progress: 0 };
+        } else if (data.type === 'file-chunk') {
+          const fileData = pendingFiles.current[data.fileId];
+          if (fileData) {
+            const chunk = data.chunk instanceof ArrayBuffer ? new Uint8Array(data.chunk) : new Uint8Array(Object.values(data.chunk));
+            fileData.chunks.set(chunk, data.offset);
+            fileData.receivedBytes += chunk.length;
+            const progress = Math.min(100, Math.floor((fileData.receivedBytes / fileData.totalSize) * 100));
+            setMessages(prev => prev.map(msg => msg.fileId === data.fileId ? { ...msg, progress } : msg));
+            if (fileData.receivedBytes === fileData.totalSize) {
+              const blob = new Blob([fileData.chunks], { type: fileData.fileType || 'application/octet-stream' });
+              const url = URL.createObjectURL(blob);
+              setMessages(prev => prev.map(msg => msg.fileId === data.fileId ? { ...msg, fileData: url, receiving: false, progress: 100 } : msg));
+              delete pendingFiles.current[data.fileId];
+            }
+          }
+          return;
+        } else if (data.type === 'audio-start') {
+          pendingFiles.current[data.audioId] = { chunks: new Uint8Array(data.audioSize), receivedBytes: 0, totalSize: data.audioSize };
+          messageToAdd = { ...baseMessage, audioId: data.audioId, type: 'audio', receiving: true, progress: 0 };
+        } else if (data.type === 'audio-chunk') {
+          const audioData = pendingFiles.current[data.audioId];
+          if (audioData) {
+            const chunk = data.chunk instanceof ArrayBuffer ? new Uint8Array(data.chunk) : new Uint8Array(Object.values(data.chunk));
+            audioData.chunks.set(chunk, data.offset);
+            audioData.receivedBytes += chunk.length;
+            const progress = Math.min(100, Math.floor((audioData.receivedBytes / audioData.totalSize) * 100));
+            setMessages(prev => prev.map(msg => msg.audioId === data.audioId ? { ...msg, progress } : msg));
+            if (audioData.receivedBytes === audioData.totalSize) {
+              const blob = new Blob([audioData.chunks], { type: 'audio/webm' });
+              const url = URL.createObjectURL(blob);
+              setMessages(prev => prev.map(msg => msg.audioId === data.audioId ? { ...msg, audioData: url, receiving: false, progress: 100 } : msg));
+              delete pendingFiles.current[data.audioId];
+            }
+          }
+          return;
+        }
+
+        if (messageToAdd) {
+          setMessages(prev => {
+            const updated = [...prev, messageToAdd];
+            if (messageToAdd.type === 'text' || messageToAdd.receiving) {
+              localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+            }
+            return updated;
+          });
+        }
+      };
+
+      const sendChunkedData = (conn, idKey, dataBlob, typePrefix, metaData) => {
+        const id = peerId + `_${typePrefix}_` + Date.now();
+        const reader = new FileReader();
+        let offset = 0;
+        const timestamp = new Date();
+        const formattedTime = formatTime(timestamp);
+        const isFile = typePrefix === 'file';
+        const localUrl = URL.createObjectURL(dataBlob);
+
+        setMessages(prev => {
+          const newMsg = {
+            ...metaData,
+            [idKey]: id,
+            sender: 'you',
+            recipient: conn.peer,
+            senderName: userName,
+            time: formattedTime,
+            type: isFile ? 'file' : 'audio',
+            sending: true,
+            progress: 0,
+            direct: true,
+            timestamp: timestamp.getTime(),
+            [isFile ? 'fileData' : 'audioData']: localUrl
+          };
+          const updated = [...prev, newMsg];
+          localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+          return updated;
+        });
+
+        try {
+          conn.send({
+            type: `${typePrefix}-start`,
+            [idKey]: id,
+            [isFile ? 'fileSize' : 'audioSize']: dataBlob.size,
+            senderName: userName,
+            time: formattedTime,
+            direct: true,
+            timestamp: timestamp.getTime(),
+            ...(isFile && { fileName: metaData.fileName, fileType: dataBlob.type })
+          });
+        } catch (err) {
+          console.error(`App: Error sending ${typePrefix}-start to`, conn.peer, err);
+          alert(`Erro ao iniciar envio: ${err.message}`);
+          setMessages(prev => prev.filter(msg => msg[idKey] !== id));
+          return;
+        }
+
+        const readChunk = () => {
+          const chunk = dataBlob.slice(offset, offset + CHUNK_SIZE);
+          reader.readAsArrayBuffer(chunk);
+        };
+
+        reader.onload = (ev) => {
+          if (!conn || !conn.open) {
+            console.error("App: Connection closed while sending chunk to", conn.peer);
+            alert(`Conexão perdida com ${getContactName(conn.peer)} durante o envio.`);
+            setMessages(prev => prev.map(msg => msg[idKey] === id ? { ...msg, sending: false, progress: -1 } : msg));
+            return;
+          }
+          const chunkBuffer = ev.target.result;
+          try {
+            conn.send({ type: `${typePrefix}-chunk`, [idKey]: id, chunk: chunkBuffer, offset: offset, direct: true });
+            offset += chunkBuffer.byteLength;
+            const progress = Math.min(100, Math.floor((offset / dataBlob.size) * 100));
+            setMessages(prev => prev.map(msg => msg[idKey] === id ? { ...msg, progress } : msg));
+            if (offset < dataBlob.size) {
+              requestAnimationFrame(readChunk);
+            } else {
+              console.log(`App: ${typePrefix} sending complete for id ${id}`);
+              setMessages(prev => {
+                const updated = prev.map(msg => msg[idKey] === id ? { ...msg, sending: false, progress: 100 } : msg);
+                localStorage.setItem(MESSAGES_STORAGE_KEY, JSON.stringify(updated));
+                return updated;
+              });
+            }
+          } catch (err) {
+            console.error(`App: Error sending ${typePrefix} chunk to`, conn.peer, err);
+            alert(`Erro ao enviar parte: ${err.message}`);
+            setMessages(prev => prev.map(msg => msg[idKey] === id ? { ...msg, sending: false, progress: -1 } : msg));
+          }
+        };
+        reader.onerror = (err) => {
+          console.error(`App: Error reading ${typePrefix} blob:`, err);
+          alert(`Erro ao ler dados: ${err.message}`);
+          setMessages(prev => prev.map(msg => msg[idKey] === id ? { ...msg, sending: false, progress: -1 } : msg));
+        };
+        readChunk();
+      };
+
+      const handleFileChange = (e) => {
+        if (!userName.trim()) {
+          alert('Defina seu nome.');
+          setEditingName(true);
+          return;
+        }
+        if (!selectedContact) {
+          alert('Selecione um contato.');
+          return;
+        }
+        const file = e.target.files[0];
+        if (!file) return;
+        const conn = connections.find(c => c.peer === selectedContact);
+        if (!conn || !conn.open) {
+          alert(`Contato ${getContactName(selectedContact)} offline.`);
+          return;
+        }
+
+        sendChunkedData(conn, 'fileId', file, 'file', { fileName: file.name });
+        fileInputRef.current.value = '';
+      };
+
+      const handleAudioRecording = (audioBlob, targetContact) => {
+        if (!userName.trim()) {
+          alert('Defina seu nome.');
+          setEditingName(true);
+          return;
+        }
+        if (!targetContact) {
+          alert('Selecione um contato.');
+          return;
+        }
+        const conn = connections.find(c => c.peer === targetContact);
+        if (!conn || !conn.open) {
+          alert(`Contato ${getContactName(targetContact)} offline.`);
+          return;
+        }
+
+        sendChunkedData(conn, 'audioId', audioBlob, 'audio', {});
+      };
+
+      const startVoiceCall = async (peerIdToCall) => {
+        if (!peerInstance.current) {
+          alert('Peer não inicializado');
+          return;
+        }
+        if (!peerIdToCall) {
+          alert('Selecione um contato.');
+          return;
+        }
+        if (activeCalls.some(c => c.peerId === peerIdToCall && c.type === 'voice')) return;
+        const conn = connections.find(c => c.peer === peerIdToCall && c.open);
+        if (!conn) {
+          alert(`Contato ${getContactName(peerIdToCall)} offline.`);
+          return;
+        }
+
+        try {
+          console.log("App: Starting voice call with:", peerIdToCall);
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+          if (!stream) return;
+
+          localStreamsRef.current.set(peerIdToCall + '_voice', stream);
+          const call = peerInstance.current.call(peerIdToCall, stream, { metadata: { type: 'voice' } });
+
+          setActiveCalls(prev => [
+            ...prev,
+            {
+              peerId: peerIdToCall,
+              call,
+              localStream: stream,
+              type: 'voice',
+              direction: 'outgoing',
+              isTemporaryStream: false
+            }
+          ]);
+
+          call.on('stream', (remoteStream) => {
+            console.log(`App: Received remote audio stream from:`, peerIdToCall);
+            setRemoteStreams(prev => [
+              ...prev.filter(s => !(s.peerId === peerIdToCall && s.type === 'voice')),
+              { peerId: peerIdToCall, stream: remoteStream, type: 'voice' }
+            ]);
+          });
+          call.on('close', () => {
+            console.log("App: Voice call closed with:", peerIdToCall);
+            endCall(peerIdToCall, 'voice');
+          });
+          call.on('error', (err) => {
+            console.error('App: Error in voice call:', err);
+            alert('Erro chamada de voz: ' + err.message);
+            endCall(peerIdToCall, 'voice');
+          });
+        } catch (err) {
+          console.error('App: Error starting voice call:', err);
+          alert('Erro ao acessar microfone: ' + err.message);
+        }
+      };
+
+      // MODIFICAÇÃO: Função toggleVideoCall corrigida para resolver o problema da webcam
+      const toggleVideoCall = async (peerIdToCall) => {
+        if (!peerInstance.current) {
+          alert('Peer não inicializado');
+          return;
+        }
+        if (!peerIdToCall) {
+          alert('Selecione um contato.');
+          return;
+        }
+
+        const existingCall = activeCalls.find(c => c.peerId === peerIdToCall && c.type === 'video');
+        const isSendingVideo = existingCall && existingCall.localStream;
+        const conn = connections.find(c => c.peer === peerIdToCall && c.open);
+
+        if (isSendingVideo) {
+          console.log("App: Stopping local video stream for:", peerIdToCall);
+          if (existingCall && existingCall.localStream) {
+            existingCall.localStream.getTracks().forEach(track => track.stop());
+            localStreamsRef.current.delete(peerIdToCall + '_video');
+          }
+
+          setActiveCalls(prev => prev.map(c => {
+            if (c.peerId === peerIdToCall && c.type === 'video') {
+              return { ...c, localStream: null };
+            }
+            return c;
+          }));
+
+          if (localStreamsRef.current.size === 0) {
+            setIsLocalVideoVisible(false);
+            if (localVideoRef.current) localVideoRef.current.srcObject = null;
+          }
+
+        } else {
+          if (!conn) {
+            alert(`Contato ${getContactName(peerIdToCall)} offline.`);
+            return;
+          }
+
+          try {
+            console.log("App: Getting video stream for:", peerIdToCall);
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            if (!stream) return;
+
+            localStreamsRef.current.set(peerIdToCall + '_video', stream);
+            setIsLocalVideoVisible(true);
+            if (localVideoRef.current) {
+              localVideoRef.current.srcObject = stream;
+              localVideoRef.current.play().catch(e => console.warn("Local video play failed:", e));
+            }
+
+            if (existingCall) {
+              console.log("App: Adding local stream to existing call with:", peerIdToCall);
+
+              setActiveCalls(prev => prev.map(c => {
+                if (c.peerId === peerIdToCall && c.type === 'video') {
+                  return { ...c, localStream: stream };
+                }
+                return c;
+              }));
+
+              // Close existing call before creating a new one
+              existingCall.call.close();
+              
+              // Create a new call with the updated stream
+              const call = peerInstance.current.call(peerIdToCall, stream, { metadata: { type: 'video' } });
+
+              call.on('stream', (remoteStream) => {
+                console.log(`App: Received remote video stream response from:`, peerIdToCall);
+                setRemoteStreams(prev => [
+                  ...prev.filter(s => !(s.peerId === peerIdToCall && s.type === 'video')),
+                  { peerId: peerIdToCall, stream: remoteStream, type: 'video' }
+                ]);
+                
+                const videoElement = videoRefs.current[peerIdToCall];
+                if (videoElement) {
+                  videoElement.srcObject = remoteStream;
+                  videoElement.play().catch(e => console.warn("Remote video play failed:", e));
+                }
+              });
+
+              call.on('close', () => {
+                console.log("App: Outgoing video stream call closed with:", peerIdToCall);
+                endCall(peerIdToCall, 'video');
+              });
+
+              call.on('error', (err) => {
+                console.error('App: Error in outgoing video stream call:', err);
+                endCall(peerIdToCall, 'video');
+              });
+              
+              // Update active calls with new call object
+              setActiveCalls(prev => prev.map(c => {
+                if (c.peerId === peerIdToCall && c.type === 'video') {
+                  return { ...c, call: call };
+                }
+                return c;
+              }));
+
+            } else {
+              console.log("App: Starting new video call with:", peerIdToCall);
+              const call = peerInstance.current.call(peerIdToCall, stream, { metadata: { type: 'video' } });
+
+              setActiveCalls(prev => [
+                ...prev.filter(c => !(c.peerId === peerIdToCall && c.type === 'video')),
+                {
+                  peerId: peerIdToCall,
+                  call,
+                  localStream: stream,
+                  type: 'video',
+                  direction: 'outgoing',
+                  isTemporaryStream: false
+                }
+              ]);
+
+              call.on('stream', (remoteStream) => {
+                console.log(`App: Received remote video stream from:`, peerIdToCall);
+                setRemoteStreams(prev => [
+                  ...prev.filter(s => !(s.peerId === peerIdToCall && s.type === 'video')),
+                  { peerId: peerIdToCall, stream: remoteStream, type: 'video' }
+                ]);
+                
+                const videoElement = videoRefs.current[peerIdToCall];
+                if (videoElement) {
+                  videoElement.srcObject = remoteStream;
+                  videoElement.play().catch(e => console.warn("Remote video play failed:", e));
+                }
+              });
+
+              call.on('close', () => {
+                console.log("App: Video call closed with:", peerIdToCall);
+                endCall(peerIdToCall, 'video');
+              });
+
+              call.on('error', (err) => {
+                console.error('App: Error in video call:', err);
+                alert('Erro chamada de vídeo: ' + err.message);
+                endCall(peerIdToCall, 'video');
+              });
+            }
+          } catch (err) {
+            console.error('App: Error starting video call:', err);
+            alert('Erro ao acessar câmera/microfone: ' + err.message);
+          }
+        }
+      };
+
+      const endCall = (peerIdToEnd, callType) => {
+        console.log(`App: Ending ${callType} call with:`, peerIdToEnd);
+        const callData = activeCalls.find(c => c.peerId === peerIdToEnd && c.type === callType);
+
+        if (callData) {
+          if (callData.call) {
+            callData.call.close();
+          }
+          if (callData.localStream) {
+            callData.localStream.getTracks().forEach(track => track.stop());
+            console.log(`App: Stopped local stream tracks for ${callType} call with ${peerIdToEnd}`);
+            stopAndRemoveLocalStream(peerIdToEnd + '_' + callType);
+          }
+        }
+
+        setActiveCalls(prev => prev.filter(c => !(c.peerId === peerIdToEnd && c.type === callType)));
+        setRemoteStreams(prev => prev.filter(s => !(s.peerId === peerIdToEnd && s.type === callType)));
+
+        const anyLocalVideoActive = Array.from(localStreamsRef.current.values()).some(
+          stream => stream.getVideoTracks().some(t => t.readyState === 'live')
+        );
+        if (!anyLocalVideoActive) {
+          setIsLocalVideoVisible(false);
+          if (localVideoRef.current) localVideoRef.current.srcObject = null;
+        } else if (
+          isLocalVideoVisible &&
+          (!localVideoRef.current?.srcObject?.active || localVideoRef.current?.srcObject === callData?.localStream)
+        ) {
+          const firstActiveStream = localStreamsRef.current.values().next().value;
+          if (localVideoRef.current && firstActiveStream) {
+            localVideoRef.current.srcObject = firstActiveStream;
+          }
+        }
+      };
+
+      const populateEmojiPanel = () => {
+        const emojis = [
+          "😀", "😁", "😂", "🤣", "😃", "😄", "😅", "😆", "😉", "😊", 
+          "😋", "😎", "😍", "😘", "🥰", "😗", "😙", "😚", "🙂", "🤗", 
+          "🤩", "🤔", "🤨", "😐", "😑", "😶", "🙄", "😏", "😣", "😥", 
+          "😮", "🤐", "😯", "😪", "😫", "😴", "😌", "😛", "😜", "😝", 
+          "🤤", "😒", "😓", "😔", "😕", "🙃", "🤑", "😲", "☹️", "🙁", 
+          "😖", "😞", "😟", "😤", "😢", "😭", "😦", "😧", "😨", "😩", 
+          "🤯", "😬", "😰", "😱", "🥵", "🥶", "😳", "🤪", "😵", "😡", 
+          "😠", "🤬", "😷", "🤒", "🤕", "🤢", "🤮", "🤧", "😇", "🥳", 
+          "🥴", "🥺", "🤠", "🤡", "🤥", "🤫", "🤭", "🧐", "🤓", "😈", 
+          "👿", "👹", "👺", "💀", "👻", "👽", "🤖", "💩", "😺", "😸"
+        ];
+
+        return (
+          <div className="emoji-panel">
+            <div className="emoji-panel-header">Emojis</div>
+            <div className="emoji-panel-content">
+              {emojis.map((emoji, index) => (
+                <span
+                  key={index}
+                  className="emoji-item"
+                  onClick={() => setNewMessage(prev => prev + emoji)}
+                >
+                  {emoji}
+                </span>
+              ))}
+            </div>
+            <div className="emoji-panel-footer">
+              <span className="barra-rolagem-label">Role para ver mais</span>
+            </div>
+          </div>
+        );
+      };
+
+      // Componente melhorado para seleção de contatos com indicadores de status e mensagens não lidas
+      const ContactSelector = ({ contacts, connections, onSelectContact, unreadMessages }) => {
+        return (
+          <div className="contact-selector">
+            <select 
+              onChange={(e) => {
+                if (e.target.value) {
+                  const selectedPeerId = e.target.value;
+                  onSelectContact(selectedPeerId);
+                  connectToPeer(selectedPeerId);
+                  
+                  // Limpar mensagens não lidas ao selecionar o contato
+                  setUnreadMessages(prev => ({
+                    ...prev,
+                    [selectedPeerId]: 0
+                  }));
+                }
+              }}
+              defaultValue=""
+              style={{ 
+                fontWeight: Object.values(unreadMessages).some(count => count > 0) ? 'bold' : 'normal'
+              }}
+            >
+              <option value="" disabled>Selecione um contato</option>
+              {contacts.map((contact, i) => {
+                const isConnected = connections.some(c => c.peer === contact.peerId && c.open);
+                const isReconnecting = reconnecting[contact.peerId];
+                const unreadCount = unreadMessages[contact.peerId] || 0;
+                const isServer = contact.peerId === serverPeerId;
+                
+                return (
+                  <option 
+                    key={i} 
+                    value={contact.peerId}
+                    style={{ 
+                      fontWeight: unreadCount > 0 ? 'bold' : 'normal',
+                      color: isConnected ? '#4CAF50' : (isReconnecting ? '#ff9800' : '#999')
+                    }}
+                  >
+                    {contact.name} {isServer ? "[SERVIDOR]" : ""} {unreadCount > 0 ? `(${unreadCount})` : ''} {isConnected ? '✓' : (isReconnecting ? '⟳' : '')}
+                  </option>
+                );
+              })}
+            </select>
+            <button onClick={() => setShowContacts(true)}>
+              <i className="fas fa-address-book"></i>
+            </button>
+          </div>
+        );
+      };
+
+      if (error) {
+        return (
+          <div className="error-message">
+            <h1>Erro</h1>
+            <p>{error}</p>
+            <button onClick={() => window.location.reload()}>Tentar novamente</button>
+          </div>
+        );
+      }
+
+      // Calcular o total de mensagens não lidas
+      const totalUnreadMessages = Object.values(unreadMessages).reduce((sum, count) => sum + count, 0);
+
+      // MODIFICAÇÃO: Ensure video refs are properly handled
+      const ensureVideoRefs = () => {
+        // Make sure videoRefs and audioRefs are initialized as objects
+        if (!videoRefs.current) videoRefs.current = {};
+        if (!audioRefs.current) audioRefs.current = {};
+        
+        // Log existing refs for debugging
+        console.log("Current video refs:", Object.keys(videoRefs.current));
+        console.log("Current audio refs:", Object.keys(audioRefs.current));
+      };
+
+      // Call ensureVideoRefs when component mounts and when activeCalls changes
+      useEffect(() => {
+        ensureVideoRefs();
+      }, [activeCalls]);
+
+      return (
+        <div>
+          <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+          <div className="app-header">
+            <h1 className="app-title">
+              k10
+              {connectedToServer && (
+                <span className="server-mode-indicator" style={{ fontSize: '12px', marginLeft: '5px' }}>
+                  MODO SERVIDOR
+                </span>
+              )}
+            </h1>
+            
+            <div className="header-buttons">
+              <button 
+                onClick={() => setShowContacts(true)} 
+                className="header-button" 
+                title="Contatos"
+                style={{ position: 'relative' }}
+              >
+                <i className="fas fa-address-book"></i>
+                {totalUnreadMessages > 0 && (
+                  <span className="chat-notification">
+                    {totalUnreadMessages}
+                  </span>
+                )}
+              </button>
+              <button 
+                onClick={toggleDarkMode} 
+                className="header-button" 
+                title="Modo Noturno" 
+                id="darkModeBtn"
+              >
+                🌙
+              </button>
+            </div>
+          </div>
+
+          <div className="user-info-container">
+            {editingName ? (
+              <div className="user-name-form">
+                <input
+                  type="text"
+                  value={userName}
+                  onChange={(e) => setUserName(e.target.value)}
+                  placeholder="Digite seu nome"
+                  autoFocus
+                />
+                <button
+                  onClick={saveUserName}
+                  disabled={!userName.trim()}
+                >
+                  Salvar
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span className="username">{userName}</span>
+                <button
+                  className="user-edit-button"
+                  onClick={() => setEditingName(true)}
+                >
+                  Editar
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="peer-id-container">
+            <span>Seu ID: {peerId}</span>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(peerId);
+                alert('ID copiado para a área de transferência!');
+              }}
+            >
+              Copiar
+            </button>
+          </div>
+
+          {/* Status da conexão com o servidor */}
+          {connectedToServer && (
+            <div className="peer-id-container" style={{ backgroundColor: '#e8f5e9' }}>
+              <span>
+                <span className="online-indicator online"></span>
+                Conectado ao servidor: {getContactName(serverPeerId)}
+              </span>
+              <button
+                onClick={() => {
+                  const conn = connections.find(c => c.peer === serverPeerId);
+                  if (conn) {
+                    if (confirm("Desconectar do servidor?")) {
+                      conn.close();
+                      setConnectedToServer(false);
+                      setServerPeerId(null);
+                    }
+                  }
+                }}
+                style={{ backgroundColor: '#dc3545' }}
+              >
+                Desconectar
+              </button>
+            </div>
+          )}
+
+          {/* Contact selector only when not in contacts screen */}
+          {!showContacts && contacts.length > 0 && 
+            <ContactSelector 
+              contacts={contacts} 
+              connections={connections} 
+              onSelectContact={setSelectedContact} 
+              unreadMessages={unreadMessages}
+            />
+          }
+
+          {/* MODIFICAÇÃO: Renderização aprimorada do contêiner de vídeo */}
+          {(remoteStreams.some(s => s.type === 'video') || isLocalVideoVisible) && (
+            <div className="video-container">
+              {isLocalVideoVisible && (
+                <div>
+                  <div className="video-label">Você</div>
+                  <video
+                    className="local-video-player"
+                    ref={localVideoRef}
+                    autoPlay
+                    muted
+                    playsInline
+                  ></video>
+                </div>
+              )}
+              {remoteStreams.filter(s => s.type === 'video').map((streamData, index) => (
+                <div key={`video-${streamData.peerId}-${index}`}>
+                  <div className="video-label">{getContactName(streamData.peerId)}</div>
+                  <video
+                    className="video-player"
+                    ref={el => {
+                      if (el) {
+                        videoRefs.current[streamData.peerId] = el;
+                        
+                        // If we have a stream and it's not already assigned to this element
+                        if (streamData.stream && (!el.srcObject || el.srcObject !== streamData.stream)) {
+                          console.log(`Setting stream to video element for ${streamData.peerId}`);
+                          el.srcObject = streamData.stream;
+                          el.play().catch(e => console.warn(`Video play failed for ${streamData.peerId}:`, e));
+                        }
+                      }
+                    }}
+                    autoPlay
+                    playsInline
+                  ></video>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* MODIFICAÇÃO: Renderização aprimorada do contêiner de áudio */}
+          {activeCalls.filter(call => call.type === 'voice').map((call, index) => (
+            <div key={`audio-call-${call.peerId}-${index}`} className="audio-call-container">
+              <span>Chamada de voz com {getContactName(call.peerId)}</span>
+              <button
+                className="call-end-button"
+                onClick={() => endCall(call.peerId, 'voice')}
+              >
+                Encerrar
+              </button>
+              <audio
+                ref={el => {
+                  if (el) {
+                    audioRefs.current[call.peerId] = el;
+                    
+                    // Find matching stream
+                    const audioStream = remoteStreams.find(s => s.peerId === call.peerId && s.type === 'voice');
+                    
+                    // If we have a stream and it's not already assigned to this element
+                    if (audioStream && audioStream.stream && (!el.srcObject || el.srcObject !== audioStream.stream)) {
+                      console.log(`Setting stream to audio element for ${call.peerId}`);
+                      el.srcObject = audioStream.stream;
+                      el.play().catch(e => console.warn(`Audio play failed for ${call.peerId}:`, e));
+                    }
+                  }
+                }}
+                autoPlay
+              ></audio>
+            </div>
+          ))}
+
+          {/* Tela de contatos ou tela de chat */}
+          {showContacts ? (
+            <ContactsScreen
+              contacts={contacts}
+              setContacts={setContacts}
+              onBack={() => setShowContacts(false)}
+              connections={connections}
+              onSelectContact={(peerId) => {
+                connectToPeer(peerId);
+                setSelectedContact(peerId);
+                setShowContacts(false);
+                // Limpar mensagens não lidas quando selecionar um contato
+                setUnreadMessages(prev => ({
+                  ...prev,
+                  [peerId]: 0
+                }));
+              }}
+            />
+          ) : (
+            <UpdatedChatManager
+              connections={connections}
+              messages={messages}
+              setMessages={setMessages}
+              contacts={contacts}
+              userName={userName}
+              peerId={peerId}
+              activeCalls={activeCalls}
+              endCall={endCall}
+              startVoiceCall={startVoiceCall}
+              toggleVideoCall={toggleVideoCall}
+              remoteStreams={remoteStreams}
+              audioRefs={audioRefs}
+              videoRefs={videoRefs}
+              handleFileChange={handleFileChange}
+              fileInputRef={fileInputRef}
+              handleAudioRecording={handleAudioRecording}
+              newMessage={newMessage}
+              setNewMessage={setNewMessage}
+              showEmojiPanel={showEmojiPanel}
+              setShowEmojiPanel={setShowEmojiPanel}
+              populateEmojiPanel={populateEmojiPanel}
+              getContactName={getContactName}
+              selectedContact={selectedContact}
+              setSelectedContact={setSelectedContact}
+              localVideoRef={localVideoRef}
+              unreadMessages={unreadMessages}
+              setUnreadMessages={setUnreadMessages}
+              setShowContacts={setShowContacts}
+              connectedToServer={connectedToServer}
+              serverPeerId={serverPeerId}
+            />
+          )}
+        </div>
+      );
+    };
+
+    // Renderização do aplicativo
+    ReactDOM.render(
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>,
+      document.getElementById('root')
+    );
+
+  </script>
+</body>
+</html>

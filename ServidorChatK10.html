@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Servidor K10</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    #root {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .peer-id-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #f8f9fa;
+      border-radius: 5px;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .message.you {
+      background-color: #e3f2fd;
+      margin-left: 20%;
+    }
+    .message.other {
+      background-color: #f1f1f1;
+      margin-right: 20%;
+    }
+    .file-link {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .progress-container {
+      margin-top: 5px;
+    }
+    .progress-bar {
+      height: 5px;
+      background: #ddd;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .progress {
+      height: 100%;
+      background: #4CAF50;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .connected-peers {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 4px;
+    }
+    .peer-item {
+      margin: 5px 0;
+      padding: 5px;
+      background: #e3f2fd;
+      border-radius: 3px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    button {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    .file-input-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .audio-player {
+      margin-top: 5px;
+      width: 100%;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .contact-form-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .contact-form input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .contacts-list {
+      max-height: 300px;
+      overflow-y: auto;
+      border-right: 4px solid #4CAF50;
+      padding-right: 10px;
+    }
+    .id-backup-container {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #fff3cd;
+      border-radius: 4px;
+      border: 1px solid #ffeeba;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .id-input {
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      width: 100px;
+      margin-right: 10px;
+    }
+    .copy-button {
+      background: #007bff;
+    }
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .status-online {
+      background-color: #4CAF50;
+    }
+    .status-offline {
+      background-color: #ff0000;
+    }
+    .status-connecting {
+      background-color: #FFC107;
+    }
+    .distribution-stats {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #e3f2fd;
+      border-radius: 5px;
+    }
+    .message-source {
+      font-size: 0.8em;
+      color: #666;
+      margin-top: 3px;
+    }
+    .debug-container {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #e8f5e9;
+      border-radius: 5px;
+      border: 1px solid #c8e6c9;
+    }
+    .server-mode-container {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: #e8f5e9;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+  </style>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.1/peerjs.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const PEER_ID_STORAGE_KEY = 'p2pChatDistributorId';
+    const DEFAULT_ID = 'AAAAAA';
+
+    const usePersistentId = () => {
+      const [peerId, setPeerId] = useState(() => {
+        try {
+          return localStorage.getItem(PEER_ID_STORAGE_KEY) || DEFAULT_ID;
+        } catch (e) {
+          return DEFAULT_ID;
+        }
+      });
+
+      useEffect(() => {
+        try {
+          localStorage.setItem(PEER_ID_STORAGE_KEY, peerId);
+          sessionStorage.setItem(PEER_ID_STORAGE_KEY, peerId);
+          document.cookie = `${PEER_ID_STORAGE_KEY}=${peerId}; max-age=31536000; path=/`;
+        } catch (e) {
+          console.error("Erro ao persistir ID:", e);
+        }
+      }, [peerId]);
+
+      return [peerId, setPeerId];
+    };
+
+    const IdBackupTools = ({ peerId, setPeerId, onSaveId, isConnected }) => {
+      const [editableId, setEditableId] = useState(peerId);
+      const [isEditing, setIsEditing] = useState(false);
+
+      const copyToClipboard = () => {
+        navigator.clipboard.writeText(peerId).then(() => {
+          alert("ID copiado para a área de transferência!");
+        });
+      };
+
+      const startEditing = () => {
+        setEditableId(peerId);
+        setIsEditing(true);
+      };
+
+      const saveId = () => {
+        if (editableId.trim() === '') {
+          alert("O ID não pode estar vazio!");
+          return;
+        }
+        
+        if (editableId !== peerId) {
+          setPeerId(editableId);
+          if (onSaveId) onSaveId(editableId);
+        }
+        
+        setIsEditing(false);
+      };
+
+      return (
+        <div className="id-backup-container">
+          <div>
+            <strong>Distributor ID:</strong> 
+            {isEditing ? (
+              <>
+                <input 
+                  type="text" 
+                  className="id-input"
+                  value={editableId}
+                  onChange={(e) => setEditableId(e.target.value)}
+                  placeholder="Insira o ID"
+                />
+                <button onClick={saveId}>Salvar</button>
+                <button onClick={() => setIsEditing(false)}>Cancelar</button>
+              </>
+            ) : (
+              <>
+                {peerId}
+                <button onClick={copyToClipboard} className="copy-button">
+                  Copiar
+                </button>
+                <button 
+                  onClick={startEditing}
+                  disabled={isConnected}
+                >
+                  Editar
+                </button>
+              </>
+            )}
+          </div>
+          {isConnected && !isEditing && (
+            <p><small>Log out to edit ID</small></p>
+          )}
+        </div>
+      );
+    };
+
+    const DistributorApp = () => {
+      const [peerId, setPeerId] = usePersistentId();
+      const [connections, setConnections] = useState([]);
+      const [messages, setMessages] = useState([]);
+      const [connectionStatus, setConnectionStatus] = useState('desconectado');
+      const [stats, setStats] = useState({
+        messagesReceived: 0,
+        messagesDistributed: 0,
+        activeConnections: 0
+      });
+      // New state to control the mode
+      const [pureServerMode, setPureServerMode] = useState(true);
+      
+      const peerInstance = useRef(null);
+      const pendingFiles = useRef({});
+      const messagesEndRef = useRef(null);
+      const activeConnectionsRef = useRef(new Map());
+      const CHUNK_SIZE = 16 * 1024;
+
+      useEffect(() => {
+        if (messagesEndRef.current) {
+          messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      }, [messages]);
+
+      const toggleConnection = () => {
+        if (connectionStatus === 'conectado' || connectionStatus === 'conectando') {
+          disconnectPeer();
+        } else {
+          setupPeer();
+        }
+      };
+
+      const disconnectPeer = () => {
+        if (peerInstance.current) {
+          try {
+            console.log("Desconectando peer...");
+            
+            activeConnectionsRef.current.forEach((conn) => {
+              try {
+                conn.close();
+              } catch (e) {
+                console.error("Erro ao fechar conexão:", e);
+              }
+            });
+            
+            activeConnectionsRef.current.clear();
+            setConnections([]);
+            
+            peerInstance.current.destroy();
+            peerInstance.current = null;
+            
+            setConnectionStatus('desconectado');
+            
+            setStats({
+              messagesReceived: 0,
+              messagesDistributed: 0,
+              activeConnections: 0
+            });
+            
+            console.log("Peer desconectado com sucesso");
+          } catch (err) {
+            console.error("Erro ao desconectar peer:", err);
+          }
+        }
+      };
+
+      const setupPeer = () => {
+        if (!peerId) return;
+
+        console.log("Configurando distribuidor com ID:", peerId);
+        setConnectionStatus('conectando');
+        
+        if (peerInstance.current) {
+          try {
+            peerInstance.current.destroy();
+          } catch (err) {
+            console.error("Erro ao destruir instância anterior:", err);
+          }
+        }
+        
+        const peer = new Peer(peerId, {
+          host: '0.peerjs.com',
+          port: 443,
+          secure: true,
+          config: {
+            iceServers: [
+              { urls: 'stun:stun.l.google.com:19302' },
+              { urls: 'stun:stun1.l.google.com:19302' }
+            ]
+          },
+          debug: 2
+        });
+
+        peer.on('open', (id) => {
+          console.log("Distribuidor conectado com ID:", id);
+          setConnectionStatus('conectado');
+        });
+
+        peer.on('connection', (conn) => {
+          console.log("Nova conexão recebida de:", conn.peer);
+          setupConnection(conn);
+        });
+
+        peer.on('error', (err) => {
+          console.error("Erro no peer:", err);
+          setConnectionStatus('erro');
+        });
+
+        peer.on('disconnected', () => {
+          console.log("Peer desconectado");
+          setConnectionStatus('desconectado');
+        });
+
+        peerInstance.current = peer;
+      };
+
+      useEffect(() => {
+        if (connectionStatus !== 'conectado' && connectionStatus !== 'conectando') return;
+        
+        const checkConnectionInterval = setInterval(() => {
+          if (peerInstance.current && peerInstance.current.disconnected) {
+            console.log("Tentando reconectar...");
+            try {
+              peerInstance.current.reconnect();
+            } catch (e) {
+              console.error("Falha na reconexão, recriando peer:", e);
+              setupPeer();
+            }
+          }
+        }, 30000);
+
+        return () => {
+          clearInterval(checkConnectionInterval);
+        };
+      }, [connectionStatus]);
+
+      const handleIdChange = (newId) => {
+        disconnectPeer();
+      };
+
+      const handleIncomingData = (data, sourceConn) => {
+        console.log(`Recebendo dados de ${sourceConn.peer}:`, data);
+        
+        setStats(prev => ({
+          ...prev,
+          messagesReceived: prev.messagesReceived + 1
+        }));
+
+        if (data.type === 'message') {
+          const senderName = data.senderName || sourceConn.peer;
+          
+          // Modify the message text to include sender name at the beginning
+          const modifiedData = {
+            ...data,
+            text: `${senderName}: ${data.text}`
+          };
+          
+          const newMessage = {
+            id: Date.now() + Math.random().toString(36).substring(7),
+            text: modifiedData.text,
+            sender: senderName,
+            timestamp: new Date().toISOString(),
+            source: sourceConn.peer
+          };
+          
+          setMessages(prev => [...prev, newMessage]);
+          
+          // Distribute the modified message that includes the sender name
+          distributeMessage(modifiedData, sourceConn.peer);
+        }
+        else if (data.type === 'file-start' || data.type === 'file-chunk') {
+          console.log("Arquivo recebido, redistribuindo...");
+          distributeMessage(data, sourceConn.peer);
+        }
+        else if (data.type === 'audio-start' || data.type === 'audio-chunk') {
+          console.log("Áudio recebido, redistribuindo...");
+          distributeMessage(data, sourceConn.peer);
+        }
+      };
+
+      const distributeMessage = (data, sourceId) => {
+        let distributionCount = 0;
+        
+        activeConnectionsRef.current.forEach((conn, peerId) => {
+          if (peerId !== sourceId) {
+            try {
+              console.log(`Distribuindo mensagem para ${peerId}`);
+              conn.send(data);
+              distributionCount++;
+            } catch (err) {
+              console.error(`Erro ao enviar para ${peerId}:`, err);
+            }
+          }
+        });
+        
+        setStats(prev => ({
+          ...prev,
+          messagesDistributed: prev.messagesDistributed + distributionCount
+        }));
+        
+        console.log(`Mensagem distribuída para ${distributionCount} conexões`);
+      };
+
+      const setupConnection = (conn) => {
+        conn.on('open', () => {
+          console.log(`Conexão estabelecida com ${conn.peer}`);
+          
+          activeConnectionsRef.current.set(conn.peer, conn);
+          
+          setConnections(Array.from(activeConnectionsRef.current.keys()));
+          
+          setStats(prev => ({
+            ...prev,
+            activeConnections: activeConnectionsRef.current.size
+          }));
+          
+          // Here is the critical change to ensure we operate in pure server mode:
+          // We'll send a special message to mark this as a server connection
+          // when pure server mode is enabled
+          if (pureServerMode) {
+            try {
+              conn.send({
+                type: 'server-info',
+                isServer: true,
+                message: 'Connected to K10 server in pure server mode' 
+              });
+            } catch (err) {
+              console.error(`Erro ao enviar informação de servidor para ${conn.peer}:`, err);
+            }
+          }
+        });
+
+        conn.on('data', (data) => {
+          handleIncomingData(data, conn);
+        });
+
+        conn.on('close', () => {
+          console.log(`Conexão fechada com ${conn.peer}`);
+          
+          activeConnectionsRef.current.delete(conn.peer);
+          
+          setConnections(Array.from(activeConnectionsRef.current.keys()));
+          
+          setStats(prev => ({
+            ...prev,
+            activeConnections: activeConnectionsRef.current.size
+          }));
+        });
+
+        conn.on('error', (err) => {
+          console.error(`Erro na conexão com ${conn.peer}:`, err);
+        });
+      };
+
+      return (
+        <div>
+          <h1>Servidor K10</h1>
+          <p>The ID consists of 6 alphanumeric characters.</p>
+          <p>More specifically:</p>
+          <p>Letters: A to Z (uppercase only)</p>
+          <p>Numbers: 2 to 9</p>    
+          <div className="peer-id-container">
+            <div>
+              <span 
+                className={`status-indicator status-${
+                  connectionStatus === 'conectado' ? 'online' : 
+                  connectionStatus === 'conectando' ? 'connecting' : 'offline'
+                }`}
+              ></span>
+              Status: {connectionStatus}
+              <button onClick={toggleConnection}>
+                {connectionStatus === 'conectado' || connectionStatus === 'conectando' ? 'Desconectar' : 'Conectar'}
+              </button>
+            </div>
+          </div>
+          
+          <IdBackupTools 
+            peerId={peerId} 
+            setPeerId={setPeerId} 
+            onSaveId={handleIdChange} 
+            isConnected={connectionStatus === 'conectado' || connectionStatus === 'conectando'}
+          />
+          
+          {/* New component for controlling server mode */}
+          <div className="server-mode-container">
+            <strong>Pure Server Mode:</strong>
+            <input 
+              type="checkbox" 
+              checked={pureServerMode} 
+              onChange={(e) => {
+                setPureServerMode(e.target.checked);
+                // If we're changing mode while connected, it's best to disconnect and reconnect
+                if (connectionStatus === 'conectado') {
+                  disconnectPeer();
+                  setTimeout(setupPeer, 500);
+                }
+              }} 
+              id="serverModeCheckbox"
+            />
+            <label htmlFor="serverModeCheckbox">
+              Enable pure server mode (prevents clients from connecting to each other)
+            </label>
+          </div>
+          
+          <div className="distribution-stats">
+            <h3>Distribution Statistics</h3>
+            <p>Messages received: {stats.messagesReceived}</p>
+            <p>Distributed messages: {stats.messagesDistributed}</p>
+            <p>Active connections: {stats.activeConnections}</p>
+          </div>
+          
+          <div className="connected-peers">
+            <h3>Active Connections ({connections.length})</h3>
+            {connections.length === 0 ? (
+              <p>No active connections</p>
+            ) : (
+              <div>
+                {connections.map((peerId, index) => (
+                 <div key={index} className="peer-item">
+                    <span className="status-indicator status-online"></span>
+                    {peerId}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div style={{ marginTop: '20px' }}>
+            <h3>Messages</h3>
+            <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
+              {messages.length === 0 ? (
+                <p>Nenhuma mensagem recebida</p>
+              ) : (
+                <div>
+                  {messages.map((msg, index) => (
+                    <div key={index} className={`message other`}>
+                      <div>{msg.text}</div>
+                      <div className="message-source">
+                        Origem: {msg.source} | {new Date(msg.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<DistributorApp />, document.getElementById('root'));
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html>

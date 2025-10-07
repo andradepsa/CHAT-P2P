@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat K10 - Comunicação Segura</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        /* Cabeçalho */
+        header {
+            background: linear-gradient(135deg, #6b48ff, #00ddeb);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+        }
+
+        nav {
+            background: #fff;
+            padding: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #6b48ff;
+        }
+
+        /* Seção App */
+        .app {
+            padding: 5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .app-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .app-image {
+            position: relative;
+            text-align: center;
+        }
+
+        .app-screenshot {
+            width: 100%;
+            max-width: 450px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s;
+            object-fit: cover;
+        }
+
+        .app-screenshot:hover {
+            transform: scale(1.05);
+        }
+
+        .app-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(107, 72, 255, 0.1) 10%, transparent 10%);
+            background-size: 20px 20px;
+            border-radius: 15px;
+            z-index: -1;
+        }
+
+        .app-info {
+            padding: 2rem;
+        }
+
+        .app-title {
+            font-size: 2.5rem;
+            color: #6b48ff;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-subtitle {
+            font-size: 1.2rem;
+            color: #555;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        .app-description {
+            margin-bottom: 2rem;
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .app-features {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .app-feature {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: #fff;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
+        .app-feature:hover {
+            transform: translateY(-5px);
+        }
+
+        .app-feature-icon {
+            font-size: 2.5rem;
+            color: #00ddeb;
+        }
+
+        .app-feature-info h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+            color: #333;
+        }
+
+        .app-feature-info p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        .app-buttons {
+            display: flex;
+            flex-direction: column; /* Alterado para empilhar botões verticalmente */
+            gap: 1rem;
+        }
+
+        .app-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.8rem 1.8rem;
+            background: linear-gradient(135deg, #6b48ff, #00ddeb);
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .app-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(107, 72, 255, 0.4);
+        }
+
+        .app-btn i {
+            font-size: 1.3rem;
+        }
+
+        /* Rodapé */
+        footer {
+            background: #333;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            font-size: 0.9rem;
+        }
+
+        /* Animações */
+        .hidden {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+
+        .visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .app-container {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .app-buttons {
+                justify-content: center;
+            }
+
+            .app-screenshot {
+                max-width: 300px;
+            }
+
+            .app-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Cabeçalho -->
+    <header>
+        <h1>Chat K10</h1>
+        <h6><a class="back-link" href="https://matematico10.com.br/">⬅️ Voltar para a Página Inicial</a></h6>
+    </header>
+    
+    <!-- App Section -->
+    <section class="app" id="app">
+        <div class="container app-container">
+            <div class="app-image hidden">
+                <img src="https://img.itch.zone/aW1hZ2UvMzUxNjE0NC8yMTEwMjc0MS5qcGc=/original/yDudwO.jpg" alt="Chat K10" class="app-screenshot">
+                <div class="app-pattern"></div>
+            </div>
+            <div class="app-info hidden">
+                <h3 class="app-title">Chat K10 - Aplicativo de Comunicação</h3>
+                <p class="app-subtitle">Desenvolvido pelo Prof. Paulo Sérgio</p>
+                <p class="app-description">Desenvolvido para comunicação privada e segura entre usuários, sem intermediários. O sistema funciona tanto em modo peer-to-peer direto quanto com servidor para grupos.</p>
+                <div class="app-features">
+                    <div class="app-feature">
+                        <div class="app-feature-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <div class="app-feature-info">
+                            <h4>Comunicação Privada</h4>
+                            <p>Converse e envie arquivos com segurança, compartilhando apenas seu ID com contatos.</p>
+                        </div>
+                    </div>
+                    <div class="app-feature">
+                        <div class="app-feature-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="app-feature-info">
+                            <h4>Salas Compartilhadas</h4>
+                            <p>Crie salas para comunicação em grupo usando o modo servidor.</p>
+                        </div>
+                    </div>
+                    <div class="app-feature">
+                        <div class="app-feature-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="app-feature-info">
+                            <h4>Modos de Operação</h4>
+                            <p>Suporta P2P direto, servidor para grupos, e combinações para flexibilidade.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="app-buttons">
+                    <a href="Chat Desktop.HTML" target="_blank" class="app-btn">
+                        <i class="fas fa-desktop"></i>
+                        <div>
+                            <span>Acesse o</span>
+                            <span>Chat K10 Desktop</span>
+                        </div>
+                    </a>
+                    <a href="Chat Mobile.HTML" target="_blank" class="app-btn">
+                        <i class="fas fa-mobile-alt"></i>
+                        <div>
+                            <span>Acesse o</span>
+                            <span>Chat K10 Mobile</span>
+                        </div>
+                    </a>
+                    <a href="ServidorChatK10.html" target="_blank" class="app-btn">
+                        <i class="fas fa-server"></i>
+                        <div>
+                            <span>Inicie um</span>
+                            <span>Servidor</span>
+                        </div>
+                    </a>
+                    <a href="https://paulo-sergio-de-andrade.itch.io/chat-p2p" target="_blank" class="app-btn">
+                        <i class="fas fa-server"></i>
+                        <div>
+                            <span>Baixe o</span>
+                            <span>Chat K10</span>
+                        </div>
+                    </a>
+                    <a href="https://github.com/andradepsa/Chicken" target="_blank" class="app-btn">
+                        <i class="fab fa-github"></i>
+                        <div>
+                            <span>Veja o</span>
+                            <span>Projeto no GitHub</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Rodapé -->
+    <footer>
+        <p>© 2025 Chat K10. Todos os direitos reservados.</p>
+    </footer>
+
+    <!-- JavaScript para Animações -->
+    <script>
+        // Animação ao rolar
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        const hiddenElements = document.querySelectorAll('.hidden');
+        hiddenElements.forEach(element => observer.observe(element));
+    </script>
+</body>
+</html>
