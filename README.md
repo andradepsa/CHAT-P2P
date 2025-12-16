@@ -22,6 +22,6 @@ Chat K10 + Chat K10 = Private Communication
 Chat K10 + Server = Group Communication
 
 ✅ Web App and GitHub Link:
-https://k10.netlify.app//chat/chat%20k10
+[https://matematico10.pages.dev/chat/](https://matematico10.pages.dev/chat/)
 
 ✅ Installer App available via the Download button below.
