@@ -554,7 +554,7 @@ body.dark-mode {
 
       const generateId = () => {
         const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
-        const buffer = new Uint8Array(6);
+        const buffer = new Uint8Array(9);
         crypto.getRandomValues(buffer);
         return Array.from(buffer)
           .map(b => chars[b % chars.length])
