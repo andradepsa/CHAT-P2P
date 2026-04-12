@@ -1,351 +1,862 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat K10 - Comunicação Segura</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat K10 — Private Communication</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Bebas+Neue&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            line-height: 1.6;
-            color: #333;
-            background: #f5f7fa;
-        }
+  :root {
+    --black: #080808;
+    --white: #f5f5f0;
+    --gray-900: #111111;
+    --gray-800: #1a1a1a;
+    --gray-700: #2a2a2a;
+    --gray-500: #555555;
+    --gray-300: #aaaaaa;
+    --gray-100: #dddddd;
+    --accent: #e8e8e0;
+  }
 
-        /* Cabeçalho */
-        header {
-            background: linear-gradient(135deg, #6b48ff, #00ddeb);
-            color: white;
-            padding: 2rem 0;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+  html { scroll-behavior: smooth; }
 
-        header h1 {
-            font-size: 2.5rem;
-            font-weight: 600;
-        }
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+    cursor: none;
+  }
 
-        nav {
-            background: #fff;
-            padding: 1rem;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-        }
+  /* Custom cursor */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--white);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9999;
+    transition: transform 0.1s ease;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring {
+    width: 40px; height: 40px;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none;
+    z-index: 9998;
+    transition: transform 0.25s ease, width 0.3s, height 0.3s, border-color 0.3s;
+    mix-blend-mode: difference;
+  }
+  .cursor-ring.hover { width: 60px; height: 60px; border-color: white; }
 
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-        }
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.5;
+  }
 
-        nav a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            font-size: 1.1rem;
-            transition: color 0.3s;
-        }
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    padding: 24px 48px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 100;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(20px);
+    background: rgba(8,8,8,0.8);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--gray-500); }
+  .nav-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--gray-300);
+    border: 1px solid var(--gray-700);
+    padding: 6px 14px;
+    text-transform: uppercase;
+  }
 
-        nav a:hover {
-            color: #6b48ff;
-        }
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 0 48px;
+    padding-top: 80px;
+    gap: 0;
+    position: relative;
+    overflow: hidden;
+  }
 
-        /* Seção App */
-        .app {
-            padding: 5rem 0;
-        }
+  .hero::after {
+    content: 'K10';
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40vw;
+    color: rgba(255,255,255,0.02);
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    letter-spacing: -10px;
+    white-space: nowrap;
+  }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
+  .hero-left {
+    display: flex; flex-direction: column; justify-content: center;
+    padding-right: 60px;
+    padding-top: 40px;
+    position: relative; z-index: 2;
+  }
 
-        .app-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: center;
-            gap: 3rem;
-        }
+  .hero-eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
 
-        .app-image {
-            position: relative;
-            text-align: center;
-        }
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 8vw, 120px);
+    line-height: 0.92;
+    letter-spacing: 2px;
+    color: var(--white);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+  .hero-title .line-gray { color: var(--gray-500); }
 
-        .app-screenshot {
-            width: 100%;
-            max-width: 450px;
-            border-radius: 15px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s;
-            object-fit: cover;
-        }
+  .hero-desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--gray-300);
+    max-width: 400px;
+    margin-bottom: 52px;
+    font-weight: 300;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s forwards;
+  }
 
-        .app-screenshot:hover {
-            transform: scale(1.05);
-        }
+  .hero-ctas {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.8s forwards;
+  }
 
-        .app-pattern {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(107, 72, 255, 0.1) 10%, transparent 10%);
-            background-size: 20px 20px;
-            border-radius: 15px;
-            z-index: -1;
-        }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--white);
+    color: var(--black);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 16px 32px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: var(--gray-300);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+  .btn-primary:hover::before { transform: translateX(0); }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-primary span { position: relative; z-index: 1; }
 
-        .app-info {
-            padding: 2rem;
-        }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent;
+    color: var(--gray-300);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 16px 32px;
+    border: 1px solid var(--gray-700);
+    transition: all 0.3s ease;
+  }
+  .btn-secondary:hover {
+    border-color: var(--gray-300);
+    color: var(--white);
+    transform: translateY(-2px);
+  }
 
-        .app-title {
-            font-size: 2.5rem;
-            color: #6b48ff;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
+  /* HERO RIGHT - Screenshots */
+  .hero-right {
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center;
+    position: relative; z-index: 2;
+    padding: 60px 0;
+  }
 
-        .app-subtitle {
-            font-size: 1.2rem;
-            color: #555;
-            margin-bottom: 1.5rem;
-            font-weight: 300;
-        }
+  .screenshots-stack {
+    position: relative;
+    width: 100%; max-width: 480px;
+    height: 420px;
+  }
 
-        .app-description {
-            margin-bottom: 2rem;
-            color: #666;
-            font-size: 1rem;
-        }
+  .screenshot-card {
+    position: absolute;
+    border: 1px solid rgba(255,255,255,0.08);
+    overflow: hidden;
+    background: var(--gray-900);
+    transition: transform 0.5s ease, box-shadow 0.5s ease;
+  }
+  /* Skeleton shimmer */
+  @keyframes shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position:  600px 0; }
+  }
 
-        .app-features {
-            display: grid;
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
+  .img-wrap {
+    position: relative; width: 100%; height: 100%;
+  }
 
-        .app-feature {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            background: #fff;
-            padding: 1rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s;
-        }
+  /* skeleton shown while loading */
+  .img-wrap::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg,
+      var(--gray-800) 25%,
+      var(--gray-700) 50%,
+      var(--gray-800) 75%);
+    background-size: 600px 100%;
+    animation: shimmer 1.6s infinite linear;
+    z-index: 1;
+    transition: opacity 0.4s ease;
+  }
+  .img-wrap.loaded::before { opacity: 0; pointer-events: none; }
 
-        .app-feature:hover {
-            transform: translateY(-5px);
-        }
+  /* progress bar at bottom of card */
+  .img-progress {
+    position: absolute; bottom: 0; left: 0;
+    height: 2px;
+    background: rgba(255,255,255,0.35);
+    width: 0%;
+    transition: width 0.3s ease;
+    z-index: 3;
+  }
 
-        .app-feature-icon {
-            font-size: 2.5rem;
-            color: #00ddeb;
-        }
+  /* error state */
+  .img-error {
+    display: none;
+    position: absolute; inset: 0;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 8px;
+    background: var(--gray-900);
+    z-index: 2;
+  }
+  .img-error svg { opacity: 0.3; }
+  .img-error span {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--gray-500);
+    text-transform: uppercase;
+  }
 
-        .app-feature-info h4 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 0.3rem;
-            color: #333;
-        }
+  .screenshot-card img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%) contrast(1.1);
+    opacity: 0;
+    transition: opacity 0.6s ease, filter 0.3s ease;
+    position: relative; z-index: 2;
+  }
+  .img-wrap.loaded img { opacity: 0.85; }
+  .screenshot-card:hover .img-wrap.loaded img { opacity: 1; filter: grayscale(80%) contrast(1.1); }
+  .screenshot-card:hover { box-shadow: 0 20px 60px rgba(0,0,0,0.8); }
 
-        .app-feature-info p {
-            color: #666;
-            font-size: 0.95rem;
-        }
+  .sc-1 { width: 65%; height: 220px; top: 0; left: 0; transform: rotate(-2deg); z-index: 3; animation: floatA 6s ease-in-out infinite; }
+  .sc-2 { width: 60%; height: 200px; top: 80px; right: 0; transform: rotate(1.5deg); z-index: 2; animation: floatB 7s ease-in-out infinite; }
+  .sc-3 { width: 70%; height: 180px; bottom: 0; left: 50%; transform: translateX(-50%) rotate(-1deg); z-index: 1; animation: floatC 5.5s ease-in-out infinite; }
 
-        .app-buttons {
-            display: flex;
-            flex-direction: column; /* Alterado para empilhar botões verticalmente */
-            gap: 1rem;
-        }
+  @keyframes floatA { 0%,100%{transform:rotate(-2deg) translateY(0)} 50%{transform:rotate(-2deg) translateY(-12px)} }
+  @keyframes floatB { 0%,100%{transform:rotate(1.5deg) translateY(0)} 50%{transform:rotate(1.5deg) translateY(-8px)} }
+  @keyframes floatC { 0%,100%{transform:translateX(-50%) rotate(-1deg) translateY(0)} 50%{transform:translateX(-50%) rotate(-1deg) translateY(-10px)} }
 
-        .app-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.8rem 1.8rem;
-            background: linear-gradient(135deg, #6b48ff, #00ddeb);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gray-700), transparent);
+    margin: 0 48px;
+  }
 
-        .app-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(107, 72, 255, 0.4);
-        }
+  /* HOW TO USE */
+  .section {
+    padding: 120px 48px;
+    position: relative;
+  }
 
-        .app-btn i {
-            font-size: 1.3rem;
-        }
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 64px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1; max-width: 80px;
+    height: 1px;
+    background: var(--gray-700);
+  }
 
-        /* Rodapé */
-        footer {
-            background: #333;
-            color: white;
-            text-align: center;
-            padding: 1.5rem 0;
-            font-size: 0.9rem;
-        }
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--gray-800);
+    border: 1px solid var(--gray-800);
+  }
 
-        /* Animações */
-        .hidden {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
+  .step-card {
+    background: var(--gray-900);
+    padding: 40px 32px;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s;
+  }
+  .step-card:hover { background: var(--gray-800); }
+  .step-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .step-card:hover::before { opacity: 1; }
 
-        .visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+  .step-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px;
+    color: rgba(255,255,255,0.05);
+    line-height: 1;
+    margin-bottom: 20px;
+    transition: color 0.3s;
+  }
+  .step-card:hover .step-number { color: rgba(255,255,255,0.1); }
 
-        /* Responsividade */
-        @media (max-width: 768px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
+  .step-emoji { font-size: 24px; margin-bottom: 12px; display: block; }
+  .step-text {
+    font-size: 15px;
+    color: var(--gray-300);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+  .step-text strong { color: var(--white); font-weight: 500; }
 
-            .app-buttons {
-                justify-content: center;
-            }
+  /* TIP SECTION */
+  .tip-block {
+    margin-top: 80px;
+    border: 1px solid var(--gray-700);
+    padding: 48px;
+    position: relative;
+    background: var(--gray-900);
+  }
+  .tip-block::before {
+    content: 'DICA';
+    position: absolute; top: -11px; left: 40px;
+    background: var(--gray-900);
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gray-500);
+    padding: 0 12px;
+    border: 1px solid var(--gray-700);
+  }
 
-            .app-screenshot {
-                max-width: 300px;
-            }
+  .tip-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 32px;
+    align-items: center;
+  }
 
-            .app-title {
-                font-size: 2rem;
-            }
-        }
-    </style>
+  .tip-item {
+    text-align: center;
+  }
+  .tip-item-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+  .tip-item-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--gray-500);
+    letter-spacing: 1px;
+  }
+
+  .tip-equals {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 40px;
+    color: var(--gray-700);
+    text-align: center;
+  }
+
+  .tip-result {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-top: 16px;
+    padding-top: 32px;
+    border-top: 1px solid var(--gray-800);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .tip-result-item {
+    padding: 20px;
+    border: 1px solid var(--gray-800);
+    background: var(--black);
+  }
+  .tip-result-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gray-500);
+    margin-bottom: 8px;
+  }
+  .tip-result-value {
+    font-size: 14px;
+    color: var(--gray-300);
+  }
+
+  /* LAUNCH SECTION */
+  .launch-section {
+    padding: 120px 48px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .launch-section::before {
+    content: '';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(255,255,255,0.03) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .launch-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 88px);
+    letter-spacing: 4px;
+    color: var(--white);
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+
+  .launch-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--gray-500);
+    margin-bottom: 56px;
+    text-transform: uppercase;
+  }
+
+  .launch-buttons {
+    display: flex; gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 40px 48px;
+    border-top: 1px solid var(--gray-800);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 4px;
+    color: var(--gray-500);
+  }
+  .footer-copy {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gray-700);
+    letter-spacing: 2px;
+  }
+
+  /* SCAN LINE ANIMATION */
+  .scan-line {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.08), transparent);
+    animation: scanDown 8s linear infinite;
+    pointer-events: none; z-index: 999;
+  }
+  @keyframes scanDown {
+    0% { top: -2px; }
+    100% { top: 100vh; }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* STATUS dot */
+  .status-dot {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--gray-500);
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+  .status-dot::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #c0c0c0;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.8)}
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+    .hero-left { padding-right: 0; }
+    .hero-right { display: none; }
+    nav { padding: 20px 24px; }
+    .section { padding: 80px 24px; }
+    .launch-section { padding: 80px 24px; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+    .tip-grid { grid-template-columns: 1fr; }
+    .tip-equals { display: none; }
+    .tip-result { grid-template-columns: 1fr; }
+    .divider { margin: 0 24px; }
+  }
+</style>
 </head>
 <body>
-    <!-- Cabeçalho -->
-    <header>
-        <h1>Chat K10</h1>
-        <h6><a class="back-link" href="https://matematico10.com.br/">⬅️ Voltar para a Página Inicial</a></h6>
-    </header>
-    
-    <!-- App Section -->
-    <section class="app" id="app">
-        <div class="container app-container">
-            <div class="app-image hidden">
-                <img src="https://img.itch.zone/aW1hZ2UvMzUxNjE0NC8yMTEwMjc0MS5qcGc=/original/yDudwO.jpg" alt="Chat K10" class="app-screenshot">
-                <div class="app-pattern"></div>
-            </div>
-            <div class="app-info hidden">
-                <h3 class="app-title">Chat K10 - Aplicativo de Comunicação</h3>
-                <p class="app-subtitle">Desenvolvido pelo Prof. Paulo Sérgio</p>
-                <p class="app-description">Desenvolvido para comunicação privada e segura entre usuários, sem intermediários. O sistema funciona tanto em modo peer-to-peer direto quanto com servidor para grupos.</p>
-                <div class="app-features">
-                    <div class="app-feature">
-                        <div class="app-feature-icon">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="app-feature-info">
-                            <h4>Comunicação Privada</h4>
-                            <p>Converse e envie arquivos com segurança, compartilhando apenas seu ID com contatos.</p>
-                        </div>
-                    </div>
-                    <div class="app-feature">
-                        <div class="app-feature-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="app-feature-info">
-                            <h4>Salas Compartilhadas</h4>
-                            <p>Crie salas para comunicação em grupo usando o modo servidor.</p>
-                        </div>
-                    </div>
-                    <div class="app-feature">
-                        <div class="app-feature-icon">
-                            <i class="fas fa-laptop-code"></i>
-                        </div>
-                        <div class="app-feature-info">
-                            <h4>Modos de Operação</h4>
-                            <p>Suporta P2P direto, servidor para grupos, e combinações para flexibilidade.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="app-buttons">
-                    <a href="Chat Desktop.HTML" target="_blank" class="app-btn">
-                        <i class="fas fa-desktop"></i>
-                        <div>
-                            <span>Acesse o</span>
-                            <span>Chat K10 Desktop</span>
-                        </div>
-                    </a>
-                    <a href="Chat Mobile.HTML" target="_blank" class="app-btn">
-                        <i class="fas fa-mobile-alt"></i>
-                        <div>
-                            <span>Acesse o</span>
-                            <span>Chat K10 Mobile</span>
-                        </div>
-                    </a>
-                    <a href="ServidorChatK10.html" target="_blank" class="app-btn">
-                        <i class="fas fa-server"></i>
-                        <div>
-                            <span>Inicie um</span>
-                            <span>Servidor</span>
-                        </div>
-                    </a>
-                    <a href="https://paulo-sergio-de-andrade.itch.io/chat-p2p" target="_blank" class="app-btn">
-                        <i class="fas fa-server"></i>
-                        <div>
-                            <span>Baixe o</span>
-                            <span>Chat K10</span>
-                        </div>
-                    </a>
-                    <a href="https://github.com/andradepsa/Chicken" target="_blank" class="app-btn">
-                        <i class="fab fa-github"></i>
-                        <div>
-                            <span>Veja o</span>
-                            <span>Projeto no GitHub</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scan-line"></div>
+
+<nav>
+  <a href="#" class="nav-logo">CHAT<span> K</span>10</a>
+  <div style="display:flex;align-items:center;gap:16px;">
+    <a href="https://github.com/andradepsa/MATEMATICO10/tree/main/chat" target="_blank" class="nav-badge" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:border-color 0.3s,color 0.3s;" onmouseover="this.style.borderColor='#aaa';this.style.color='#f5f5f0'" onmouseout="this.style.borderColor='';this.style.color=''">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GITHUB
+    </a>
+    <div class="nav-badge">SECURE COMMUNICATION</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="status-dot">SYSTEM ONLINE</div>
+    <div class="hero-eyebrow">Messages · Files · Privacy</div>
+    <h1 class="hero-title">
+      CHAT<br>
+      <span class="line-gray">PRIVATE</span><br>
+      K10
+    </h1>
+    <p class="hero-desc">
+      Direct and secure communication, no middlemen. Open it in your browser, share your ID, and start instantly.
+    </p>
+    <div class="hero-ctas">
+      <a href="https://andradepsa.github.io/MATEMATICO10/chat/Chat%20Desktop.HTML" class="btn-primary">
+        <span>💬 Desktop Chat</span>
+      </a>
+      <a href="https://andradepsa.github.io/MATEMATICO10/chat/ServidorChatK10.html" class="btn-secondary">
+        🌐 Group Server
+      </a>
+      <a href="https://github.com/andradepsa/MATEMATICO10/tree/main/chat" target="_blank" class="btn-secondary" style="display:inline-flex;align-items:center;gap:8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+        Repository
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="screenshots-stack">
+      <div class="screenshot-card sc-1">
+        <div class="img-wrap" id="wrap1">
+          <div class="img-progress" id="prog1"></div>
+          <div class="img-error" id="err1">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+            <span>Sem imagem</span>
+          </div>
+          <img id="img1" data-src="https://images.pling.com/img/00/00/84/94/30/2352294/451.jpg" alt="Chat K10 screenshot 1" loading="eager" decoding="async">
         </div>
-    </section>
+      </div>
+      <div class="screenshot-card sc-2">
+        <div class="img-wrap" id="wrap2">
+          <div class="img-progress" id="prog2"></div>
+          <div class="img-error" id="err2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+            <span>Sem imagem</span>
+          </div>
+          <img id="img2" data-src="https://images.pling.com/img/00/00/84/94/30/2352294/21.jpg" alt="Chat K10 screenshot 2" loading="eager" decoding="async">
+        </div>
+      </div>
+      <div class="screenshot-card sc-3">
+        <div class="img-wrap" id="wrap3">
+          <div class="img-progress" id="prog3"></div>
+          <div class="img-error" id="err3">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m9 9 6 6M15 9l-6 6"/></svg>
+            <span>Sem imagem</span>
+          </div>
+          <img id="img3" data-src="https://images.pling.com/img/00/00/84/94/30/2352294/80326ab9-7e6d-43f6-ba10-50dee3e7d536.png" alt="Chat K10 screenshot 3" loading="eager" decoding="async">
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-    <!-- Rodapé -->
-    <footer>
-        <p>© 2025 Chat K10. Todos os direitos reservados.</p>
-    </footer>
+<div class="divider"></div>
 
-    <!-- JavaScript para Animações -->
-    <script>
-        // Animação ao rolar
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, { threshold: 0.1 });
+<!-- HOW TO USE -->
+<section class="section">
+  <div class="section-label">How to use</div>
 
-        const hiddenElements = document.querySelectorAll('.hidden');
-        hiddenElements.forEach(element => observer.observe(element));
-    </script>
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-number">01</div>
+      <span class="step-emoji">🌐</span>
+      <div class="step-text"><strong>Open in Browser</strong><br>Use it directly — no installation needed. Access via the Desktop Chat or Server link.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">02</div>
+      <span class="step-emoji">🔐</span>
+      <div class="step-text"><strong>Share your ID</strong><br>Send your ID to a contact and establish a private connection between you two.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">03</div>
+      <span class="step-emoji">🚀</span>
+      <div class="step-text"><strong>Start Immediately</strong><br>No sign-up, no waiting. Communication begins right away.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-number">04</div>
+      <span class="step-emoji">📁💬</span>
+      <div class="step-text"><strong>Chat &amp; Send Files</strong><br>Exchange messages and share files securely and instantly.</div>
+    </div>
+  </div>
+
+  <!-- TIP -->
+  <div class="tip-block">
+    <div class="tip-grid">
+      <div class="tip-item">
+        <div class="tip-item-title">CHAT K10</div>
+        <div class="tip-item-sub">+ CHAT K10</div>
+      </div>
+      <div class="tip-equals">+</div>
+      <div class="tip-item">
+        <div class="tip-item-title">SERVER</div>
+        <div class="tip-item-sub">Chat K10</div>
+      </div>
+      <div class="tip-result">
+        <div class="tip-result-item">
+          <div class="tip-result-label">Private</div>
+          <div class="tip-result-value">Chat K10 + Chat K10 = Private Communication between two users</div>
+        </div>
+        <div class="tip-result-item">
+          <div class="tip-result-label">Group</div>
+          <div class="tip-result-value">Chat K10 + Server = Group Communication for multiple users</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- LAUNCH CTA -->
+<section class="launch-section">
+  <div class="launch-title">READY<br>TO USE</div>
+  <div class="launch-sub">Choose your communication mode</div>
+  <div class="launch-buttons">
+    <a href="https://andradepsa.github.io/MATEMATICO10/chat/Chat%20Desktop.HTML" class="btn-primary">
+      <span>💬 Open Private Chat</span>
+    </a>
+    <a href="https://andradepsa.github.io/MATEMATICO10/chat/ServidorChatK10.html" class="btn-secondary">
+      🌐 Open Group Server
+    </a>
+    <a href="https://github.com/andradepsa/MATEMATICO10/tree/main/chat" target="_blank" class="btn-secondary" style="display:inline-flex;align-items:center;gap:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      View Repository
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">CHAT K10</div>
+  <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center;">
+    <div class="footer-copy">✅ ACCESS · CONNECT · COMMUNICATE</div>
+    <a href="https://github.com/andradepsa/MATEMATICO10/tree/main/chat" target="_blank" style="display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:#555555;text-decoration:none;border:1px solid #2a2a2a;padding:6px 14px;transition:color 0.3s,border-color 0.3s;" onmouseover="this.style.color='#aaaaaa';this.style.borderColor='#555'" onmouseout="this.style.color='#555555';this.style.borderColor='#2a2a2a'">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      GITHUB
+    </a>
+  </div>
+</footer>
+
+<script>
+  // ── Image loading treatment (sem XHR — evita CORS) ───────
+  function setupImg(imgId, wrapId, progId, errId) {
+    const img  = document.getElementById(imgId);
+    const wrap = document.getElementById(wrapId);
+    const prog = document.getElementById(progId);
+    const err  = document.getElementById(errId);
+    if (!img) return;
+
+    // Simulated indeterminate progress bar via steps
+    const steps = [8, 20, 35, 52, 68, 80, 90];
+    let stepIdx = 0;
+    let timer = setInterval(() => {
+      if (stepIdx < steps.length) {
+        prog.style.transition = 'width 0.6s ease';
+        prog.style.width = steps[stepIdx++] + '%';
+      }
+    }, 400);
+
+    function showLoaded() {
+      clearInterval(timer);
+      prog.style.transition = 'width 0.25s ease';
+      prog.style.width = '100%';
+      setTimeout(() => {
+        wrap.classList.add('loaded');
+        prog.style.transition = 'opacity 0.4s ease';
+        prog.style.opacity = '0';
+      }, 260);
+    }
+
+    function showError() {
+      clearInterval(timer);
+      wrap.classList.add('loaded');
+      prog.style.opacity = '0';
+      err.style.display = 'flex';
+    }
+
+    const src = img.getAttribute('data-src');
+    if (!src) { showError(); return; }
+
+    // Use native <img> — no CORS restriction
+    img.addEventListener('load',  showLoaded, { once: true });
+    img.addEventListener('error', showError,  { once: true });
+
+    // If already cached and decoded before JS ran
+    if (img.complete && img.naturalWidth > 0) {
+      showLoaded();
+    } else {
+      img.src = src;   // trigger browser load
+    }
+  }
+
+  setupImg("img1", "wrap1", "prog1", "err1");
+  setupImg("img2", "wrap2", "prog2", "err2");
+  setupImg("img3", "wrap3", "prog3", "err3");
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx - 6}px, ${my - 6}px)`;
+  });
+
+  function animateRing() {
+    rx += (mx - rx) * 0.12;
+    ry += (my - ry) * 0.12;
+    ring.style.transform = `translate(${rx - 20}px, ${ry - 20}px)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hover'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hover'));
+  });
+
+  // Intersection Observer for step cards
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }, i * 100);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.step-card').forEach((card, i) => {
+    card.style.opacity = '0';
+    card.style.transform = 'translateY(30px)';
+    card.style.transition = `opacity 0.6s ease ${i*0.1}s, transform 0.6s ease ${i*0.1}s, background 0.3s`;
+    observer.observe(card);
+  });
+
+  // Tip block animation
+  const tipObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.2 });
+
+  const tipBlock = document.querySelector('.tip-block');
+  if (tipBlock) {
+    tipBlock.style.opacity = '0';
+    tipBlock.style.transform = 'translateY(30px)';
+    tipBlock.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+    tipObserver.observe(tipBlock);
+  }
+</script>
 </body>
 </html>
