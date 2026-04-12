@@ -1,9 +1,7 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
+<html lang="pt-br"><head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Servidor K10</title>
+  <title>Servidor K10 - Distribuidor</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     body {
@@ -183,7 +181,46 @@
       align-items: center;
       gap: 10px;
     }
+
+    /* TUTORIAL MODAL */
+    .tutorial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 16px; animation: fadeIn 0.25s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .tutorial-modal { background: #0f172a; border-radius: 20px; max-width: 680px; width: 100%; min-height: 600px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; border: 1px solid #1e3a5f; box-shadow: 0 24px 80px rgba(0,0,0,0.7); }
+    .tutorial-header { background: linear-gradient(135deg, #1e40af, #7c3aed); padding: 22px 28px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+    .tutorial-header h2 { margin: 0; color: white; font-size: 20px; display: flex; align-items: center; gap: 10px; }
+    .tutorial-close { background: rgba(255,255,255,0.15); border: none; color: white; width: 34px; height: 34px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+    .tutorial-close:hover { background: rgba(255,255,255,0.28); }
+    .tutorial-tabs { display: flex; background: #1e293b; border-bottom: 1px solid #334155; overflow-x: auto; flex-shrink: 0; }
+    .tutorial-tab { padding: 11px 18px; color: #94a3b8; cursor: pointer; font-size: 12px; font-weight: 600; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.2s; }
+    .tutorial-tab.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+    .tutorial-tab:hover { color: #cbd5e1; }
+    .tutorial-content { padding: 24px 28px; overflow-y: auto; flex: 1; color: #f8fafc; }
+    .tutorial-content h3 { color: #93c5fd; font-size: 16px; margin: 0 0 14px; display: flex; align-items: center; gap: 8px; }
+    .tutorial-content p { font-size: 14px; line-height: 1.7; margin: 0 0 12px; color: #e2e8f0; }
+    .tutorial-step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; text-align: left; }
+    .tutorial-step-num { background: linear-gradient(135deg, #1e40af, #7c3aed); color: white; border-radius: 50%; width: 28px; height: 28px; min-width: 28px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; margin-top: 2px; }
+    .tutorial-step-num.server { background: linear-gradient(135deg, #f59e0b, #d97706); }
+    .tutorial-step-num.shield { background: linear-gradient(135deg, #10b981, #059669); }
+    .tutorial-step-text { flex: 1; }
+    .tutorial-step-text strong { color: #ffffff; font-size: 14px; display: block; margin-bottom: 3px; }
+    .tutorial-step-text span { font-size: 13px; color: #cbd5e1; line-height: 1.6; }
+    .tutorial-tip { background: #0a2a1a; border: 1px solid #10b981; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #6ee7b7; margin-top: 14px; display: flex; gap: 8px; text-align: left; }
+    .tutorial-warn { background: #1c1200; border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #fcd34d; margin-top: 10px; display: flex; gap: 8px; text-align: left; }
+    .tutorial-badge { display: inline-flex; align-items: center; gap: 4px; background: #1e3a5f; border: 1px solid #2563eb; border-radius: 6px; padding: 2px 8px; font-size: 11px; color: #93c5fd; font-weight: 700; margin: 2px; }
+    .tutorial-badge.green { background: #0a2a1a; border-color: #10b981; color: #34d399; }
+    .tutorial-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 28px; border-top: 1px solid #1e293b; background: #0f172a; flex-shrink: 0; }
+    .tutorial-nav button { background: #1e3a5f; border: 1px solid #2563eb; color: #93c5fd; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; margin-left: 0; }
+    .tutorial-nav button:hover { background: #2563eb; color: white; }
+    .tutorial-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+    .tutorial-nav button.primary { background: #2563eb; color: white; }
+    .tutorial-nav button.primary:hover { background: #1d4ed8; }
+    .tutorial-dots { display: flex; gap: 6px; }
+    .tutorial-dot { width: 8px; height: 8px; border-radius: 50%; background: #334155; transition: all 0.2s; }
+    .tutorial-dot.active { background: #60a5fa; transform: scale(1.3); }
   </style>
+</head>
+<body>
+  <div id="root"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -193,23 +230,530 @@
   <script type="text/babel">
     const { useState, useEffect, useRef } = React;
 
+    const TRANSLATIONS = {
+      en: {
+        serverTitle: "K10 Server",
+        distributorId: "Distributor ID:",
+        save: "Save",
+        cancel: "Cancel",
+        copy: "Copy",
+        edit: "Edit",
+        logoutToEdit: "Log out to edit ID",
+        status: "Status:",
+        disconnect: "Disconnect",
+        connect: "Connect",
+        forceReconnect: "Force Reconnect",
+        pureServerMode: "Pure Server Mode:",
+        activatePureServer: "Activate pure server mode",
+        startYoutubeChat: "Start YT Chat",
+        stopYoutubeChat: "Stop YT Chat",
+        connectToOtherServer: "Connect to another Server:",
+        serverIdPlaceholder: "Server ID",
+        knownServers: "Known Servers:",
+        distributionStats: "Distribution Statistics",
+        messagesReceived: "Messages Received",
+        messagesDistributed: "Messages Distributed",
+        activeConnections: "Active Connections",
+        hydraWebSize: "Hydra Web Size",
+        estimatedP2PNodes: "Estimated P2P Nodes",
+        noActiveConnections: "No active connections",
+        messages: "Messages",
+        noMessagesReceived: "No messages received",
+        origin: "Origin:",
+        idCopied: "ID copied to clipboard!",
+        idEmpty: "ID cannot be empty!",
+        serverSelfAdd: "Server cannot add itself!",
+        invalidYoutubeUrl: "Invalid YouTube URL",
+        enterYoutubeUrl: "Enter YouTube Live URL for Chat:",
+        connected: "connected",
+        disconnected: "disconnected",
+        connecting: "connecting",
+        error: "error",
+        errorIdUnavailable: "error-id-unavailable",
+        errorFatal: "error-fatal",
+        reconnecting: "reconnecting",
+        darkMode: "Dark Mode",
+        tutorial: "Tutorial",
+        language: "PT",
+        serverFullMigration: "Server full! Migrating you to the decentralized network.",
+        pureServerModeConnected: "Connected to K10 server in pure server mode",
+        globalRadio: "Global Radio",
+        k10Server: "K10 Server",
+        serverName: "SERVER",
+        chatAlreadyActive: "A chat is already active. Stop it first.",
+        hydraModeMessage: "Server in Hydra mode. Connect to the global network.",
+        idDescription1: "The ID consists of 6 alphanumeric characters.",
+        idDescription2: "More specifically:",
+        idDescription3: "Letters: A to Z (uppercase only)",
+        idDescription4: "Numbers: 2 to 9",
+        ytChatExplanation: "You can start a chat on a YouTube Live and broadcast the YouTube chat from the server. Use the 'Start YT Chat' button. This information is available in both Media and Server menus."
+      },
+      pt: {
+        serverTitle: "Servidor K10",
+        distributorId: "ID do Distribuidor:",
+        save: "Salvar",
+        cancel: "Cancelar",
+        copy: "Copiar",
+        edit: "Editar",
+        logoutToEdit: "Desconecte para editar o ID",
+        status: "Status:",
+        disconnect: "Desconectar",
+        connect: "Conectar",
+        forceReconnect: "Forçar Reconexão",
+        pureServerMode: "Modo Servidor Puro:",
+        activatePureServer: "Ativar modo servidor puro",
+        startYoutubeChat: "Iniciar Chat YT",
+        stopYoutubeChat: "Parar Chat YT",
+        connectToOtherServer: "Conectar a outro Servidor:",
+        serverIdPlaceholder: "ID do Servidor",
+        knownServers: "Servidores Conhecidos:",
+        distributionStats: "Estatísticas de Distribuição",
+        messagesReceived: "Mensagens Recebidas",
+        messagesDistributed: "Mensagens Distribuídas",
+        activeConnections: "Conexões Ativas",
+        hydraWebSize: "Tamanho da Teia Hydra",
+        estimatedP2PNodes: "Nós P2P Estimados",
+        noActiveConnections: "Nenhuma conexão ativa",
+        messages: "Mensagens",
+        noMessagesReceived: "Nenhuma mensagem recebida",
+        origin: "Origem:",
+        idCopied: "ID copiado para a área de transferência!",
+        idEmpty: "O ID não pode estar vazio!",
+        serverSelfAdd: "O servidor não pode adicionar ele mesmo!",
+        invalidYoutubeUrl: "URL do YouTube inválida",
+        enterYoutubeUrl: "Digite a URL do YouTube Live para o Chat:",
+        connected: "conectado",
+        disconnected: "desconectado",
+        connecting: "conectando",
+        error: "erro",
+        errorIdUnavailable: "erro-id-indisponível",
+        errorFatal: "erro-fatal",
+        reconnecting: "reconectando",
+        darkMode: "Modo Noturno",
+        tutorial: "Tutorial",
+        language: "EN",
+        serverFullMigration: "Servidor cheio! Migrando você para a rede descentralizada.",
+        pureServerModeConnected: "Conectado ao servidor K10 em modo servidor puro",
+        globalRadio: "Rádio Global",
+        k10Server: "Servidor K10",
+        serverName: "SERVIDOR",
+        chatAlreadyActive: "Um chat já está ativo. Pare-o primeiro.",
+        hydraModeMessage: "Servidor em modo Hydra. Conecte-se à rede global.",
+        idDescription1: "O ID consiste em 6 caracteres alfanuméricos.",
+        idDescription2: "Mais especificamente:",
+        idDescription3: "Letras: A a Z (apenas maiúsculas)",
+        idDescription4: "Números: 2 a 9",
+        ytChatExplanation: "Você pode iniciar um chat em uma live do YouTube e transmitir o chat do YouTube a partir do servidor. Use o botão 'Iniciar Chat YT'. Esta informação está disponível nos menus Mídias e Servidor."
+      }
+    };
+
+    const t = (lang, key, vars = {}) => {
+      let str = TRANSLATIONS[lang][key] || TRANSLATIONS['en'][key] || key;
+      Object.entries(vars).forEach(([k, v]) => { str = str.replace(`{${k}}`, v); });
+      return str;
+    };
+
     const PEER_ID_STORAGE_KEY = 'p2pChatDistributorId';
     const DEFAULT_ID = 'AAAAAA';
+
+    const TUTORIAL_PAGES_EN = [
+      {
+        tab: "🚀 Getting Started",
+        title: "Getting Started",
+        content: (
+          <div>
+            <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Set your name</strong><span>At the top, click <em>Edit</em> and type your display name. Others will see this name when you send messages.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Copy your ID</strong><span>Your unique peer ID is shown below your name. Click <em>Copy</em> and share it with people you want to chat with.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Generate Invite Link</strong><span>Creates a unique URL. When shared, the contact automatically joins your chat without needing to copy the ID manually.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">4</div><div className="tutorial-step-text"><strong>Add a contact</strong><span>Click the <span className="tutorial-badge">📋 Contacts</span> button in the header. Enter the contact's name and their Peer ID, then click Add.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">5</div><div className="tutorial-step-text"><strong>Connect & Chat</strong><span>Click a contact in the Contacts screen — this initiates a P2P connection. Once connected, they appear in the Conversations list.</span></div></div>
+          </div>
+        )
+      },
+      {
+        tab: "🔒 Encryption (E2EE)",
+        title: "End-to-End Encryption",
+        content: (
+          <div>
+            <p>Chat K10 uses <strong style={{color:'#34d399'}}>AES-256-GCM</strong> encryption derived via PBKDF2. This means only you and your contact can read messages — not even a server admin can.</p>
+            <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Click the 🔑 key button</strong><span>Found in the message input bar. This opens the secret exchange modal.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Select a contact & send</strong><span>A unique 64-character secret is generated and sent <em>directly via P2P</em> — the server never sees it.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Ask them to do the same</strong><span>For full two-way encryption, <strong>both sides must exchange secrets</strong>. If only one side sends a secret, the other will not be able to decrypt the messages. Once both have exchanged, the 🔒 icon appears.</span></div></div>
+            <div className="tutorial-tip"><span>🛡️</span><span><strong>Server Encryption Prerequisite:</strong> To use encryption on a server, you MUST first establish individual encryption with each participant. Only those with active encryption will see messages; others (and the server) will see only scrambled text.</span></div>
+            <div className="tutorial-warn"><span>⚠️</span><span>Secrets cannot be recovered if lost. They are stored only in your browser's local storage.</span></div>
+          </div>
+        )
+      },
+      {
+        tab: "🎬 Tools",
+        title: "Tools, Media & Collaboration",
+        content: (
+          <div className="tutorial-content">
+            <p>Chat K10 offers a powerful set of tools for collaboration, calls, and entertainment.</p>
+            
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #8b5cf6' }}>
+              <h4 style={{ color: '#a78bfa', margin: '0 0 10px 0', textAlign: 'center' }}>1. VOICE & VIDEO CALLS</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Start a voice call</strong><span>In the Conversations list, click the <span className="tutorial-badge">📞 phone</span> icon next to a contact. Your browser will ask for microphone permission.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Start a video call</strong><span>Click the <span className="tutorial-badge">📷 camera</span> icon. Your local video appears with a blue border; the contact's video appears alongside.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Adjust volume</strong><span>Use the volume slider in the active call bar shown at the top of the page.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">4</div><div className="tutorial-step-text"><strong>End the call</strong><span>Click the red <span className="tutorial-badge">📞 end</span> icon or the <em>End Call</em> button in the call bar.</span></div></div>
+              <div className="tutorial-tip"><span>💡</span><span>You can have simultaneous voice and video calls with different contacts.</span></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #3b82f6' }}>
+              <h4 style={{ color: '#60a5fa', margin: '0 0 10px 0', textAlign: 'center' }}>2. FILES AND AUDIO</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Send a file</strong><span>Click the <span className="tutorial-badge">📎 paperclip</span> button. Select any file from your device. It transfers in chunks directly via P2P.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Record & send audio</strong><span>Click the <span className="tutorial-badge">🎙️ microphone</span> button to start recording. Click again to stop — the audio is sent automatically.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🧲</div><div className="tutorial-step-text"><strong>Torrent Manager</strong><span>Click the <span className="tutorial-badge">🧲 magnet</span> icon in the <em>Conversations</em> list to open the manager and share large files.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🧲+</div><div className="tutorial-step-text"><strong>Direct Torrent Sending</strong><span>Click the <span className="tutorial-badge">🧲 magnet</span> icon next to a contact's name to send a file directly to them.</span></div></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #ef4444' }}>
+              <h4 style={{ color: '#f87171', margin: '0 0 10px 0', textAlign: 'center' }}>3. TOOLS MENU (🎛️)</h4>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">🎨</div>
+                <div className="tutorial-step-text">
+                  <strong>Collaborative Whiteboard (P2P Whiteboard)</strong>
+                  <span>
+                    <strong>What it is:</strong> A virtual whiteboard where room users can draw, make arrows, and write together in real-time.<br/>
+                    <strong>Why it's free/scalable:</strong> It's just an &lt;canvas&gt; element in HTML5. When someone draws a stroke, we send the coordinates via P2P text. It's extremely lightweight and zero server.<br/>
+                    <strong>Impact:</strong> Excellent for explaining ideas visually during a call.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">📊</div>
+                <div className="tutorial-step-text">
+                  <strong>Live Polls (P2P Polls)</strong>
+                  <span>
+                    <strong>What it is:</strong> Any user can create a poll (e.g., "Which radio should we listen to now?"). Others click to vote and the chart updates in real-time.<br/>
+                    <strong>Why it's free/scalable:</strong> Votes are sent as invisible P2P messages. Each user's browser does the math and draws the progress bar.<br/>
+                    <strong>Impact:</strong> Greatly increases engagement in rooms with many people.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">📝</div>
+                <div className="tutorial-step-text">
+                  <strong>Collaborative Code Editor (Markdown)</strong>
+                  <span>
+                    <strong>What it is:</strong> Allows sending formatted text in bold, italics, or code blocks in a collaborative window.<br/>
+                    <strong>Why it's free/scalable:</strong> Processing is done 100% in the recipient's browser using free libraries (like marked.js).<br/>
+                    <strong>Impact:</strong> Essential for programmers to share code or highlight important information in chat.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step"><div className="tutorial-step-num red">🎧</div><div className="tutorial-step-text"><strong>Radios & YouTube</strong><span>Broadcast music, YouTube videos, or world radios synchronized for everyone in the room.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num red">🌍</div><div className="tutorial-step-text"><strong>World Radios</strong><span>Search for online radios worldwide, listen to a preview, and broadcast to the room!</span></div></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid #10b981' }}>
+              <h4 style={{ color: '#34d399', margin: '0 0 10px 0', textAlign: 'center' }}>4. FLOATING WINDOWS</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Multi-Stream</strong><span>You can see up to 10 video windows at once. If more users stream, use the cycle button.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Next Camera 🔄</strong><span>Each floating window has a "Next Camera" button in the header. Click it to cycle through all available streams.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Sync for All</strong><span>When you start a stream, it appears for everyone. New users joining will automatically receive active streams!</span></div></div>
+            </div>
+          </div>
+        )
+      },
+      {
+        tab: "⚙️ Advanced",
+        title: "Advanced Features",
+        content: (
+          <div>
+            <div className="tutorial-step"><div className="tutorial-step-num">🌙</div><div className="tutorial-step-text"><strong>Dark Mode</strong><span>Click the 🌙 button in the header to toggle dark mode. Your preference is saved automatically.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">🌍</div><div className="tutorial-step-text"><strong>Language</strong><span>Click the <span className="tutorial-badge">PT / EN</span> button in the header to switch between English and Portuguese at any time.</span></div></div>
+            <div className="tutorial-tip"><span>🔐</span><span>All secrets and message history are stored locally in your browser. Clearing browser data will erase them permanently.</span></div>
+          </div>
+        )
+      },
+      {
+        tab: "🌐 Servers & Network",
+        title: "Servers, Encryption & General Web",
+        content: (
+          <div className="tutorial-content">
+            <p>Chat K10 features a flexible architecture allowing everything from direct P2P connections to complex networks of interconnected servers.</p>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #6366f1' }}>
+              <h4 style={{ color: '#818cf8', margin: '0 0 10px 0', textAlign: 'center' }}>0. INITIAL SERVER CONFIGURATION</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Set Server Name</strong><span>Click <em>Edit</em> at the top. This will be the official name of your server for everyone who connects.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Server ID (-CENTRAL)</strong><span>Your server ID is unique and must end in <strong>-CENTRAL</strong>. Copy and share this ID so users can join your hub.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Add Other Servers</strong><span>In <span className="tutorial-badge">📋 Contacts</span>, you can add IDs of other servers. This creates a bridge between them, allowing messages to travel across the entire network.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">4</div><div className="tutorial-step-text"><strong>Connect & Manage</strong><span>By clicking a server contact, you establish a link. Your users can now talk to the other server's users automatically!</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
+              <h4 style={{ color: '#fcd34d', margin: '0 0 10px 0', textAlign: 'center' }}>1. CENTRAL SERVER & FRIEND SERVERS</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                The <strong>K10 Server</strong> (<code style={{background:'#0f172a',padding:'2px 6px',borderRadius:'4px'}}>servidor-k10.html</code>) acts as a hub. Everyone connects to it, and it relays messages. The server ID always ends in <strong>-CENTRAL</strong>.
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num server">1</div><div className="tutorial-step-text"><strong>Connect to Server</strong><span>Add the server ID in <span className="tutorial-badge">📋 Contacts</span> and click to connect.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">2</div><div className="tutorial-step-text"><strong>Friend Servers (Server Network)</strong><span>You can add the ID of <strong>other servers</strong> as a contact in your server! How does it work? The servers interconnect and relay messages to each other. <strong>Everything will act as a server</strong>, creating a massive decentralized network of interconnected servers.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">3</div><div className="tutorial-step-text"><strong>200 Users Limit</strong><span>Each server supports up to 200 people. If it exceeds this, the "boss" (server owner) computer might crash.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #10b981' }}>
+              <h4 style={{ color: '#34d399', margin: '0 0 10px 0', textAlign: 'center' }}>2. SERVER ENCRYPTION (GROUP E2EE)</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                By default, the server can read messages. To prevent this, use <strong>Group Encryption</strong>.
+              </p>
+              <div className="tutorial-warn"><span>❗</span><span><strong>Important:</strong> For server encryption to work, you MUST have established individual encryption (🔑) with your contacts first. This is mandatory!</span></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">1</div><div className="tutorial-step-text"><strong>Exchange Individual Secrets</strong><span>Use the <span className="tutorial-badge green">🔑</span> button to establish E2EE with each contact first. This is mandatory!</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">2</div><div className="tutorial-step-text"><strong>Activate Group Encryption (Both Sides)</strong><span>Select the server and click <span className="tutorial-badge green">🛡️</span>. <strong>Both you and your contact must activate this</strong>. If you activate it but your contact doesn't, they will see your messages as gibberish, and vice versa.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">3</div><div className="tutorial-step-text"><strong>Visibility Rules</strong><span>Only users with encryption active can see the messages. If someone joins without encryption, they will see nothing but gibberish. The server admin also sees nothing.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">4</div><div className="tutorial-step-text"><strong>Total Privacy</strong><span>When server encryption is active, there is total separation: the server (admin) cannot see message content, and users in the same room who do not have shared encryption will also see nothing. Only people who have exchanged and activated shared encryption on the server will be able to see each other and read each other's messages normally.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #ef4444' }}>
+              <h4 style={{ color: '#f87171', margin: '0 0 10px 0', textAlign: 'center' }}>3. YOUTUBE LIVE CHAT BROADCAST</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num red">💬</div><div className="tutorial-step-text"><strong>YouTube Live Chat</strong><span>You can initiate a chat in a YouTube Live and broadcast the YouTube chat directly from the server. Use the <strong>Start YT Chat</strong> button on the server to activate this feature.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #3b82f6' }}>
+              <h4 style={{ color: '#60a5fa', margin: '0 0 10px 0', textAlign: 'center' }}>4. GENERAL WEB (INFINITE P2P MODE)</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                If the server reaches 150 people, it <strong>automatically migrates</strong> everyone to the P2P General Web. The server becomes a "Hydra", pointing new users to the decentralized network.
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num">🌐</div><div className="tutorial-step-text"><strong>Infinite Capacity (∞)</strong><span>In the General Web, there is no central server. Your message hops from browser to browser (up to 15 hops), potentially reaching billions of people.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">📢</div><div className="tutorial-step-text"><strong>Public & Open</strong><span>No contact selected? You are in the General Web. Your messages are public to everyone on the network.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">⚡</div><div className="tutorial-step-text"><strong>SuperNode Mode</strong><span>Toggle <span className="tutorial-badge">⚡ SuperNode</span> to increase your connection limit from 15 to 50, strengthening the network.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid #8b5cf6' }}>
+              <h4 style={{ color: '#a78bfa', margin: '0 0 10px 0', textAlign: 'center' }}>5. RESILIENCE & SERVER FAILURE</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '10px' }}>
+                What happens if the server goes offline?
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num">🛡️</div><div className="tutorial-step-text"><strong>Unstoppable Chat</strong><span>If the server goes down, you don't lose your friends! Users already connected via P2P stay connected. For others, the app automatically switches to the <strong>General Web</strong> to find new routes. The network is indestructible because it doesn't depend on a single point.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid #10b981' }}>
+              <h4 style={{ color: '#34d399', margin: '0 0 10px 0', textAlign: 'center' }}>6. SERVER WEB vs. USER WEB</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '10px' }}>
+                The network is built on two layers of resilience:
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num">🏢</div><div className="tutorial-step-text"><strong>Server Web (Backbone)</strong><span>Servers can add other servers as contacts. This creates a "backbone" of high-capacity hubs that relay messages across large distances instantly.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">👥</div><div className="tutorial-step-text"><strong>User Web (P2P Mesh)</strong><span>Every user is a node. By default, you connect to 15 neighbors (or 50 in SuperNode). This limit exists to prevent your browser from slowing down while ensuring that, through "hops", your message can still reach everyone.</span></div></div>
+              <div className="tutorial-tip"><span>💡</span><span>The combination of both makes the network fast (via servers) and indestructible (via users).</span></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginTop: '20px', border: '1px solid #3b82f6' }}>
+              <h4 style={{ color: '#60a5fa', margin: '0 0 10px 0', textAlign: 'center' }}>7. HYDRA RELAY & PURE WEB</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">🚀</div><div className="tutorial-step-text"><strong>General Mode Broadcast</strong><span>When General Mode is active, your message is sent to everyone connected to the same network. This can reach thousands or millions of servers simultaneously via the 'Hydra' relay system. You receive these global messages through your server's relay.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🕸️</div><div className="tutorial-step-text"><strong>Pure Web (Serverless)</strong><span>In Pure Web mode, there are no servers at all. It is a 100% user-to-user decentralized mesh. It is indestructible because it relies solely on the users being online, with no central point of failure.</span></div></div>
+            </div>
+          </div>
+        )
+      }
+    ];
+
+    const TUTORIAL_PAGES_PT = [
+      {
+        tab: "🚀 Primeiros Passos",
+        title: "Primeiros Passos",
+        content: (
+          <div>
+            <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Defina seu nome</strong><span>No topo, clique em <em>Editar</em> e digite seu nome. Os outros verão este nome quando você enviar mensagens.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Copie seu ID</strong><span>Seu ID único está abaixo do nome. Clique em <em>Copiar</em> e compartilhe com quem quiser conversar.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Gerar Link de Convite</strong><span>Cria uma URL única. Ao compartilhar, o contato entra automaticamente no seu chat sem precisar copiar o ID manualmente.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">4</div><div className="tutorial-step-text"><strong>Adicione um contato</strong><span>Clique em <span className="tutorial-badge">📋 Contatos</span> no cabeçalho. Insira o nome e o ID do contato, depois clique em Adicionar.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">5</div><div className="tutorial-step-text"><strong>Conecte e converse</strong><span>Clique em um contato na tela de Contatos para iniciar a conexão P2P. Após conectado, ele aparece na lista de Conversas.</span></div></div>
+          </div>
+        )
+      },
+      {
+        tab: "🔒 Criptografia",
+        title: "Criptografia de Ponta a Ponta",
+        content: (
+          <div>
+            <p>O Chat K10 usa criptografia <strong style={{color:'#34d399'}}>AES-256-GCM</strong> derivada via PBKDF2. Somente você e seu contato podem ler as mensagens.</p>
+            <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Clique no botão 🔑</strong><span>Está na barra de entrada de mensagens. Abre o modal de troca de segredo.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Selecione o contato e envie</strong><span>Um segredo único de 64 caracteres é gerado e enviado <em>diretamente via P2P</em> — o servidor nunca vê.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Peça para ele fazer o mesmo</strong><span>Para criptografia bidirecional, <strong>ambos devem trocar segredos</strong>. Se apenas um lado enviar o segredo, o outro não conseguirá descriptografar as mensagens. Feito isso, o ícone 🔒 aparece.</span></div></div>
+            <div className="tutorial-tip"><span>🛡️</span><span><strong>Pré-requisito do Servidor:</strong> Para usar criptografia em um servidor, você DEVE primeiro estabelecer a criptografia individual com cada participante. Somente quem tiver a criptografia ativa verá as mensagens; outros (e o servidor) verão apenas texto embaralhado.</span></div>
+            <div className="tutorial-warn"><span>⚠️</span><span>Segredos não podem ser recuperados se perdidos. Ficam apenas no armazenamento local do navegador.</span></div>
+          </div>
+        )
+      },
+      {
+        tab: "🎬 Ferramentas",
+        title: "Ferramentas, Mídias e Colaboração",
+        content: (
+          <div className="tutorial-content">
+            <p>O Chat K10 oferece um conjunto de ferramentas poderosas para colaboração, chamadas e entretenimento.</p>
+            
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #8b5cf6' }}>
+              <h4 style={{ color: '#a78bfa', margin: '0 0 10px 0', textAlign: 'center' }}>1. CHAMADAS DE VOZ E VÍDEO</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Iniciar chamada de voz</strong><span>Na lista de Conversas, clique no ícone <span className="tutorial-badge">📞 telefone</span> ao lado do contato. O navegador pedirá permissão para o microfone.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Iniciar chamada de vídeo</strong><span>Clique no ícone <span className="tutorial-badge">📷 câmera</span>. Seu vídeo local aparece com borda azul; o vídeo do contato aparece ao lado.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Ajustar volume</strong><span>Use o controle de volume na barra de chamada ativa no topo da página.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">4</div><div className="tutorial-step-text"><strong>Encerrar chamada</strong><span>Clique no ícone vermelho <span className="tutorial-badge">📞 fim</span> ou no botão <em>Encerrar Chamada</em> na barra de chamada.</span></div></div>
+              <div className="tutorial-tip"><span>💡</span><span>Você pode ter chamadas de voz e vídeo simultâneas com contatos diferentes.</span></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #3b82f6' }}>
+              <h4 style={{ color: '#60a5fa', margin: '0 0 10px 0', textAlign: 'center' }}>2. ARQUIVOS E ÁUDIO</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Enviar arquivo</strong><span>Clique no botão <span className="tutorial-badge">📎 clipe</span>. Selecione qualquer arquivo. Ele é transferido em partes via P2P.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Gravar e enviar áudio</strong><span>Clique no botão <span className="tutorial-badge">🎙️ microfone</span> para iniciar a gravação. Clique novamente para parar — o áudio é enviado automaticamente.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🧲</div><div className="tutorial-step-text"><strong>Gerenciador Torrent</strong><span>Clique no ícone de <span className="tutorial-badge">🧲 imã</span> na lista de <em>Conversas</em> para abrir o gerenciador e compartilhar arquivos grandes.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🧲+</div><div className="tutorial-step-text"><strong>Enviar Torrent Direto</strong><span>Clique no ícone <span className="tutorial-badge">🧲 imã</span> ao lado do nome de um contato para enviar um arquivo diretamente para ele.</span></div></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #ef4444' }}>
+              <h4 style={{ color: '#f87171', margin: '0 0 10px 0', textAlign: 'center' }}>3. MENU FERRAMENTAS (🎛️)</h4>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">🎨</div>
+                <div className="tutorial-step-text">
+                  <strong>Lousa Colaborativa (P2P Whiteboard)</strong>
+                  <span>
+                    <strong>O que é:</strong> Um quadro branco virtual onde os usuários da sala podem desenhar, fazer setas e escrever juntos em tempo real.<br/>
+                    <strong>Por que é gratuito/escalável:</strong> É apenas um elemento &lt;canvas&gt; no HTML5. Quando alguém desenha um traço, enviamos as coordenadas via texto pelo P2P. É extremamente leve e zero servidor.<br/>
+                    <strong>Impacto:</strong> Excelente para explicar ideias visualmente durante uma call.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">📊</div>
+                <div className="tutorial-step-text">
+                  <strong>Enquetes ao Vivo (P2P Polls)</strong>
+                  <span>
+                    <strong>O que é:</strong> Qualquer usuário pode criar uma votação (ex: "Qual rádio vamos ouvir agora?"). Os outros clicam para votar e o gráfico atualiza em tempo real.<br/>
+                    <strong>Por que é gratuito/escalável:</strong> Os votos são enviados como mensagens P2P invisíveis. O navegador de cada usuário faz a soma matemática e desenha a barra de progresso.<br/>
+                    <strong>Impacto:</strong> Aumenta absurdamente o engajamento em salas com muitas pessoas.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step">
+                <div className="tutorial-step-num red">📝</div>
+                <div className="tutorial-step-text">
+                  <strong>Editor Colaborativo de Código (Markdown)</strong>
+                  <span>
+                    <strong>O que é:</strong> Permite enviar textos formatados em negrito, itálico ou blocos de código em uma janela colaborativa.<br/>
+                    <strong>Por que é gratuito/escalável:</strong> O processamento é feito 100% no navegador de quem recebe a mensagem usando bibliotecas gratuitas (como marked.js).<br/>
+                    <strong>Impacto:</strong> Essencial para programadores compartilharem código ou para destacar informações importantes no chat.
+                  </span>
+                </div>
+              </div>
+              <div className="tutorial-step"><div className="tutorial-step-num red">🎧</div><div className="tutorial-step-text"><strong>Rádios e YouTube</strong><span>Transmita músicas, vídeos do YouTube ou rádios mundiais sincronizados para todos na sala.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num red">🌍</div><div className="tutorial-step-text"><strong>Rádios do Mundo</strong><span>Busque rádios online do mundo todo, ouça uma prévia e transmita para a sala!</span></div></div>
+            </div>
+
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', border: '1px solid #10b981' }}>
+              <h4 style={{ color: '#34d399', margin: '0 0 10px 0', textAlign: 'center' }}>4. JANELAS FLUTUANTES</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">1</div><div className="tutorial-step-text"><strong>Multi-Stream</strong><span>Você pode ver até 10 janelas de vídeo ao mesmo tempo. Se mais usuários transmitirem, use o botão de alternar.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">2</div><div className="tutorial-step-text"><strong>Próxima Câmera 🔄</strong><span>Cada janela flutuante tem um botão "Próxima Câmera" no cabeçalho. Clique nele para alternar entre todos os streams disponíveis.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">3</div><div className="tutorial-step-text"><strong>Sincronia para Todos</strong><span>Quando você inicia um stream, ele aparece para todos. Novos usuários que entrarem receberão automaticamente os streams ativos!</span></div></div>
+            </div>
+          </div>
+        )
+      },
+      {
+        tab: "⚙️ Avançado",
+        title: "Recursos Avançados",
+        content: (
+          <div>
+            <div className="tutorial-step"><div className="tutorial-step-num">🌙</div><div className="tutorial-step-text"><strong>Modo Noturno</strong><span>Clique no botão 🌙 no cabeçalho para alternar. Sua preferência é salva automaticamente.</span></div></div>
+            <div className="tutorial-step"><div className="tutorial-step-num">🌍</div><div className="tutorial-step-text"><strong>Idioma</strong><span>Clique em <span className="tutorial-badge">PT / EN</span> para alternar entre inglês e português a qualquer momento.</span></div></div>
+            <div className="tutorial-tip"><span>🔐</span><span>Todos os segredos e histórico de mensagens ficam salvos localmente no navegador. Limpar os dados do navegador os apagará permanentemente.</span></div>
+          </div>
+        )
+      },
+      {
+        tab: "🌐 Servidores & Rede",
+        title: "Servidores, Criptografia e Teia Geral",
+        content: (
+          <div className="tutorial-content">
+            <p>O Chat K10 possui uma arquitetura flexível que permite desde conexões P2P diretas até redes complexas de servidores interligados.</p>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
+              <h4 style={{ color: '#fcd34d', margin: '0 0 10px 0', textAlign: 'center' }}>0. CONFIGURAÇÃO INICIAL DO SERVIDOR</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num server">1</div><div className="tutorial-step-text"><strong>Defina o nome do servidor</strong><span>No topo, clique em <em>Editar</em> e digite o nome do seu servidor. Este nome será visível para os usuários conectados.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">2</div><div className="tutorial-step-text"><strong>Seu ID de Servidor</strong><span>Seu ID termina em <strong>-CENTRAL</strong>. Clique em <em>Copiar</em> e compartilhe para que os usuários possam se conectar ao seu servidor.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">3</div><div className="tutorial-step-text"><strong>Adicione outros servidores</strong><span>Para criar uma "Teia de Servidores" (Backbone), insira o ID de outro servidor no campo de conexão e clique em <em>Conectar</em>.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">4</div><div className="tutorial-step-text"><strong>Gerencie os Links</strong><span>Servidores conectados aparecem na lista de "Servidores Conhecidos". Você pode removê-los a qualquer momento.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #f59e0b' }}>
+              <h4 style={{ color: '#fcd34d', margin: '0 0 10px 0', textAlign: 'center' }}>1. SERVIDOR CENTRAL & SERVIDORES AMIGOS</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                O <strong>Servidor K10</strong> (<code style={{background:'#0f172a',padding:'2px 6px',borderRadius:'4px'}}>servidor-k10.html</code>) funciona como um hub. Todos se conectam a ele, e ele retransmite as mensagens. O ID do servidor sempre termina em <strong>-CENTRAL</strong>.
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num server">1</div><div className="tutorial-step-text"><strong>Conectar ao Servidor</strong><span>Adicione o ID do servidor em <span className="tutorial-badge">📋 Contatos</span> e clique para conectar.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">2</div><div className="tutorial-step-text"><strong>Servidores Amigos (Rede de Servidores)</strong><span>Você pode adicionar o ID de <strong>outros servidores</strong> como contato no seu servidor! Como funciona? Os servidores se interligam e repassam as mensagens entre si. <strong>Tudo vai ficar como servidor</strong>, criando uma mega rede descentralizada de servidores interconectados.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num server">3</div><div className="tutorial-step-text"><strong>Limite de 200 Usuários</strong><span>Cada servidor suporta até 200 pessoas. Se passar disso, o computador do "chefe" (dono do servidor) pode travar.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #10b981' }}>
+              <h4 style={{ color: '#34d399', margin: '0 0 10px 0', textAlign: 'center' }}>2. CRIPTOGRAFIA NO SERVIDOR (E2EE DE GRUPO)</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                Por padrão, o servidor pode ler as mensagens. Para evitar isso, use a <strong>Criptografia de Grupo</strong>.
+              </p>
+              <div className="tutorial-warn"><span>❗</span><span><strong>Importante:</strong> Para a criptografia do servidor funcionar, você DEVE ter estabelecido a criptografia individual (🔑) com seus contatos antes. Isso é obrigatório!</span></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">1</div><div className="tutorial-step-text"><strong>Troque Segredos Individuais</strong><span>Use o botão <span className="tutorial-badge green">🔑</span> para estabelecer E2EE com cada contato primeiro. Isso é obrigatório!</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">2</div><div className="tutorial-step-text"><strong>Ative a Criptografia de Grupo (Ambos os Lados)</strong><span>Selecione o servidor e clique em <span className="tutorial-badge green">🛡️</span>. <strong>Você e seu contato devem ativar isso</strong>. Se você ativar e seu contato não, ele verá suas mensagens como códigos ilegíveis, e vice-versa.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">3</div><div className="tutorial-step-text"><strong>Regras de Visibilidade</strong><span>Apenas usuários com a criptografia ativa conseguem ver as mensagens normalmente. Se alguém entrar sem a criptografia ativa, não verá nada além de códigos ilegíveis. O servidor também não vê nada.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num shield">4</div><div className="tutorial-step-text"><strong>Privacidade Total</strong><span>Quando a criptografia está ativa no servidor, ocorre uma separação total: o servidor (administrador) não consegue ver o conteúdo das mensagens, e os usuários na mesma sala que não possuem a criptografia compartilhada também não verão nada. Somente as pessoas que trocaram e ativaram a criptografia compartilhada no servidor conseguirão se enxergar e ler as mensagens umas das outras normalmente.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #3b82f6' }}>
+              <h4 style={{ color: '#60a5fa', margin: '0 0 10px 0', textAlign: 'center' }}>3. TEIA GERAL (MODO P2P INFINITO)</h4>
+              <p style={{ fontSize: '14px', color: '#e2e8f0', marginBottom: '15px' }}>
+                Se o servidor atingir 150 pessoas, ele <strong>migra automaticamente</strong> todos para a Teia Geral P2P. O servidor vira uma "Hydra", apontando novos usuários para a rede descentralizada.
+              </p>
+              <div className="tutorial-step"><div className="tutorial-step-num">🌐</div><div className="tutorial-step-text"><strong>Capacidade Infinita (∞)</strong><span>Na Teia Geral, não há servidor central. Sua mensagem pula de navegador em navegador (até 15 saltos), podendo alcançar bilhões de pessoas.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">📢</div><div className="tutorial-step-text"><strong>Público & Aberto</strong><span>Sem contato selecionado? Você está na Teia Geral. Suas mensagens são públicas para todos na rede.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">⚡</div><div className="tutorial-step-text"><strong>Modo SuperNó</strong><span>Ative <span className="tutorial-badge">⚡ SuperNó</span> para aumentar seu limite de conexões de 15 para 50, fortalecendo a rede.</span></div></div>
+            </div>
+            <div style={{ background: '#1e293b', padding: '15px', borderRadius: '12px', marginBottom: '20px', border: '1px solid #ef4444' }}>
+              <h4 style={{ color: '#f87171', margin: '0 0 10px 0', textAlign: 'center' }}>4. RESILIÊNCIA E QUEDA DO SERVIDOR</h4>
+              <div className="tutorial-step"><div className="tutorial-step-num">🛡️</div><div className="tutorial-step-text"><strong>O que acontece se o servidor cair?</strong><span>Se o servidor cair, os usuários que estavam conectados serão <strong>migrados automaticamente para o Modo Geral</strong>. Isso garante que a comunicação nunca seja interrompida.</span></div></div>
+              <div className="tutorial-step"><div className="tutorial-step-num">🔄</div><div className="tutorial-step-text"><strong>Reconexão Automática</strong><span>O programa tentará se reconectar ao servidor continuamente em segundo plano enquanto você continua ativo na Teia P2P.</span></div></div>
+            </div>
+          </div>
+        )
+      }
+    ];
+
+    const TutorialModal = ({ lang, onClose }) => {
+      const [page, setPage] = useState(0);
+      const pages = lang === 'pt' ? TUTORIAL_PAGES_PT : TUTORIAL_PAGES_EN;
+      const current = pages[page];
+      return (
+        <div className="tutorial-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+          <div className="tutorial-modal">
+            <div className="tutorial-header">
+              <h2>📖 {current.title}</h2>
+              <button className="tutorial-close" onClick={onClose}>✕</button>
+            </div>
+            <div className="tutorial-tabs">
+              {pages.map((p, i) => (
+                <div key={i} className={`tutorial-tab${page === i ? ' active' : ''}`} onClick={() => setPage(i)}>{p.tab}</div>
+              ))}
+            </div>
+            <div className="tutorial-content">{current.content}</div>
+            <div className="tutorial-nav">
+              <button onClick={() => setPage(p => p - 1)} disabled={page === 0}>← {lang === 'pt' ? 'Anterior' : 'Previous'}</button>
+              <div className="tutorial-dots">
+                {pages.map((_, i) => <div key={i} className={`tutorial-dot${page === i ? ' active' : ''}`} />)}
+              </div>
+              {page < pages.length - 1
+                ? <button className="primary" onClick={() => setPage(p => p + 1)}>{lang === 'pt' ? 'Próximo' : 'Next'} →</button>
+                : <button className="primary" onClick={onClose}>{lang === 'pt' ? '✅ Concluir' : '✅ Done'}</button>
+              }
+            </div>
+          </div>
+        </div>
+      );
+    };
 
     const usePersistentId = () => {
       const [peerId, setPeerId] = useState(() => {
         try {
-          return localStorage.getItem(PEER_ID_STORAGE_KEY) || DEFAULT_ID;
+          const saved = localStorage.getItem(PEER_ID_STORAGE_KEY) || DEFAULT_ID;
+          return saved.endsWith('-CENTRAL') ? saved : saved + '-CENTRAL';
         } catch (e) {
-          return DEFAULT_ID;
+          return DEFAULT_ID + '-CENTRAL';
         }
       });
 
       useEffect(() => {
         try {
-          localStorage.setItem(PEER_ID_STORAGE_KEY, peerId);
-          sessionStorage.setItem(PEER_ID_STORAGE_KEY, peerId);
-          document.cookie = `${PEER_ID_STORAGE_KEY}=${peerId}; max-age=31536000; path=/`;
+          const formattedId = peerId.endsWith('-CENTRAL') ? peerId : peerId + '-CENTRAL';
+          if (formattedId !== peerId) {
+            setPeerId(formattedId);
+            return;
+          }
+          localStorage.setItem(PEER_ID_STORAGE_KEY, formattedId);
+          sessionStorage.setItem(PEER_ID_STORAGE_KEY, formattedId);
+          document.cookie = `${PEER_ID_STORAGE_KEY}=${formattedId}; max-age=31536000; path=/`;
         } catch (e) {
           console.error("Erro ao persistir ID:", e);
         }
@@ -218,13 +762,13 @@
       return [peerId, setPeerId];
     };
 
-    const IdBackupTools = ({ peerId, setPeerId, onSaveId, isConnected }) => {
+    const IdBackupTools = ({ peerId, setPeerId, onSaveId, isConnected, lang }) => {
       const [editableId, setEditableId] = useState(peerId);
       const [isEditing, setIsEditing] = useState(false);
 
       const copyToClipboard = () => {
         navigator.clipboard.writeText(peerId).then(() => {
-          alert("ID copiado para a área de transferência!");
+          alert(t(lang, 'idCopied'));
         });
       };
 
@@ -235,7 +779,7 @@
 
       const saveId = () => {
         if (editableId.trim() === '') {
-          alert("O ID não pode estar vazio!");
+          alert(t(lang, 'idEmpty'));
           return;
         }
         
@@ -250,7 +794,7 @@
       return (
         <div className="id-backup-container">
           <div>
-            <strong>Distributor ID:</strong> 
+            <strong>{t(lang, 'distributorId')}</strong> 
             {isEditing ? (
               <>
                 <input 
@@ -258,51 +802,159 @@
                   className="id-input"
                   value={editableId}
                   onChange={(e) => setEditableId(e.target.value)}
-                  placeholder="Insira o ID"
+                  placeholder={t(lang, 'distributorId')}
                 />
-                <button onClick={saveId}>Salvar</button>
-                <button onClick={() => setIsEditing(false)}>Cancelar</button>
+                <button onClick={saveId}>{t(lang, 'save')}</button>
+                <button onClick={() => setIsEditing(false)}>{t(lang, 'cancel')}</button>
               </>
             ) : (
               <>
                 {peerId}
                 <button onClick={copyToClipboard} className="copy-button">
-                  Copiar
+                  {t(lang, 'copy')}
                 </button>
                 <button 
                   onClick={startEditing}
                   disabled={isConnected}
                 >
-                  Editar
+                  {t(lang, 'edit')}
                 </button>
               </>
             )}
           </div>
           {isConnected && !isEditing && (
-            <p><small>Log out to edit ID</small></p>
+            <p><small>{t(lang, 'logoutToEdit')}</small></p>
           )}
         </div>
       );
     };
 
     const DistributorApp = () => {
+      const [lang, setLang] = useState(() => localStorage.getItem('serverLang') || 'en');
       const [peerId, setPeerId] = usePersistentId();
       const [connections, setConnections] = useState([]);
       const [messages, setMessages] = useState([]);
-      const [connectionStatus, setConnectionStatus] = useState('desconectado');
+      const [connectionStatus, setConnectionStatus] = useState('disconnected');
       const [stats, setStats] = useState({
         messagesReceived: 0,
         messagesDistributed: 0,
-        activeConnections: 0
+        activeConnections: 0,
+        hydraNodes: 0
       });
+
+      useEffect(() => {
+        localStorage.setItem('serverLang', lang);
+      }, [lang]);
       // New state to control the mode
       const [pureServerMode, setPureServerMode] = useState(true);
+      const [knownServers, setKnownServers] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('knownServers') || '[]'); } catch { return []; }
+      });
+      const [newServerId, setNewServerId] = useState('');
+      const [youtubeChatId, setYoutubeChatId] = useState(null);
+      const [showTutorial, setShowTutorial] = useState(false);
+      const [youtubeBroadcasts, setYoutubeBroadcasts] = useState({});
+      const youtubeChatIdRef = useRef(null);
+      useEffect(() => { youtubeChatIdRef.current = youtubeChatId; }, [youtubeChatId]);
+      const radioStateRef = useRef({ status: 'idle', startTime: 0, duration: 0 });
       
       const peerInstance = useRef(null);
       const pendingFiles = useRef({});
       const messagesEndRef = useRef(null);
       const activeConnectionsRef = useRef(new Map());
+      const seenMessagesRef = useRef(new Set());
+      const isHydraModeRef = useRef(false);
+      const recentPeersRef = useRef([]);
+      const heartbeatsRef = useRef(new Map());
+      const HYDRA_THRESHOLD = 150;
       const CHUNK_SIZE = 16 * 1024;
+
+      // ── Reconexão robusta ──────────────────────────────────────────────
+      const reconnectAttemptsRef = useRef(0);
+      const reconnectTimerRef    = useRef(null);
+      const keepaliveTimerRef    = useRef(null);
+      const isManualDisconnectRef = useRef(false); // distingue desconexão manual
+      const MAX_RECONNECT_ATTEMPTS = 20; // circuit-breaker
+      const BASE_RECONNECT_DELAY   = 2000; // 2s inicial
+
+      // Backoff exponencial com jitter: 2s, 4s, 8s … até 60s
+      const getBackoffDelay = (attempt) => {
+        const exp = Math.min(BASE_RECONNECT_DELAY * Math.pow(2, attempt), 60000);
+        return exp + Math.random() * 1000; // jitter de até 1s
+      };
+
+      // Cancela qualquer timer de reconexão pendente
+      const clearReconnectTimer = () => {
+        if (reconnectTimerRef.current) {
+          clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = null;
+        }
+      };
+
+      // Para o keepalive
+      const stopKeepalive = () => {
+        if (keepaliveTimerRef.current) {
+          clearInterval(keepaliveTimerRef.current);
+          keepaliveTimerRef.current = null;
+        }
+      };
+
+      // Keepalive: envia um ping ao servidor PeerJS a cada 25s para evitar timeout silencioso
+      const startKeepalive = () => {
+        stopKeepalive();
+        keepaliveTimerRef.current = setInterval(() => {
+          const p = peerInstance.current;
+          if (p && !p.destroyed && !p.disconnected) {
+            try { p.socket._socket && p.socket._socket.send('{}'); } catch(e) {}
+            // Também detecta conexões mortas e remove
+            activeConnectionsRef.current.forEach((conn, id) => {
+              try {
+                const state = conn.peerConnection && conn.peerConnection.connectionState;
+                if (state === 'failed' || state === 'closed') {
+                  console.warn(`Keepalive: removendo conexão morta ${id}`);
+                  activeConnectionsRef.current.delete(id);
+                  setConnections(Array.from(activeConnectionsRef.current.keys()));
+                }
+              } catch(e) {}
+            });
+          } else if (p && p.disconnected && !p.destroyed) {
+            console.log("Keepalive: peer desconectado, tentando reconectar...");
+            scheduleReconnect();
+          }
+        }, 25000);
+      };
+
+      // Agenda reconexão com backoff – único ponto de entrada para retentativas
+      const scheduleReconnect = () => {
+        if (isManualDisconnectRef.current) return;
+        clearReconnectTimer();
+
+        if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
+          console.error(`Circuit-breaker: ${MAX_RECONNECT_ATTEMPTS} tentativas falharam. Desistindo.`);
+          setConnectionStatus('errorFatal');
+          stopKeepalive();
+          return;
+        }
+
+        const delay = getBackoffDelay(reconnectAttemptsRef.current);
+        reconnectAttemptsRef.current += 1;
+        console.log(`Reconectando em ${(delay/1000).toFixed(1)}s (tentativa ${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})...`);
+        setConnectionStatus(`reconnecting (${reconnectAttemptsRef.current}/${MAX_RECONNECT_ATTEMPTS})`);
+
+        reconnectTimerRef.current = setTimeout(() => {
+          const p = peerInstance.current;
+          if (p && !p.destroyed) {
+            try {
+              p.reconnect();
+              return;
+            } catch(e) {
+              console.warn("p.reconnect() falhou, recriando peer:", e);
+            }
+          }
+          // Se reconnect() falhar ou peer estiver destruído, recria do zero
+          setupPeer();
+        }, delay);
+      };
 
       useEffect(() => {
         if (messagesEndRef.current) {
@@ -311,40 +963,31 @@
       }, [messages]);
 
       const toggleConnection = () => {
-        if (connectionStatus === 'conectado' || connectionStatus === 'conectando') {
+        if (connectionStatus === 'connected' || connectionStatus.startsWith('reconnecting') || connectionStatus === 'connecting') {
           disconnectPeer();
         } else {
+          isManualDisconnectRef.current = false;
+          reconnectAttemptsRef.current = 0;
           setupPeer();
         }
       };
 
       const disconnectPeer = () => {
+        isManualDisconnectRef.current = true; // impede reconexão automática
+        clearReconnectTimer();
+        stopKeepalive();
         if (peerInstance.current) {
           try {
-            console.log("Desconectando peer...");
-            
+            console.log("Desconectando peer (manual)...");
             activeConnectionsRef.current.forEach((conn) => {
-              try {
-                conn.close();
-              } catch (e) {
-                console.error("Erro ao fechar conexão:", e);
-              }
+              try { conn.close(); } catch (e) {}
             });
-            
             activeConnectionsRef.current.clear();
             setConnections([]);
-            
             peerInstance.current.destroy();
             peerInstance.current = null;
-            
-            setConnectionStatus('desconectado');
-            
-            setStats({
-              messagesReceived: 0,
-              messagesDistributed: 0,
-              activeConnections: 0
-            });
-            
+            setConnectionStatus('disconnected');
+            setStats({ messagesReceived: 0, messagesDistributed: 0, activeConnections: 0 });
             console.log("Peer desconectado com sucesso");
           } catch (err) {
             console.error("Erro ao desconectar peer:", err);
@@ -354,126 +997,394 @@
 
       const setupPeer = () => {
         if (!peerId) return;
+        if (isManualDisconnectRef.current) return; // respeita desconexão manual
 
         console.log("Configurando distribuidor com ID:", peerId);
-        setConnectionStatus('conectando');
+        setConnectionStatus('connecting');
+        stopKeepalive();
+        clearReconnectTimer();
         
         if (peerInstance.current) {
-          try {
-            peerInstance.current.destroy();
-          } catch (err) {
-            console.error("Erro ao destruir instância anterior:", err);
-          }
+          try { peerInstance.current.destroy(); } catch (err) {}
+          peerInstance.current = null;
         }
         
         const peer = new Peer(peerId, {
           host: '0.peerjs.com',
           port: 443,
           secure: true,
+          pingInterval: 5000, // PeerJS interno: ping a cada 5s
           config: {
             iceServers: [
               { urls: 'stun:stun.l.google.com:19302' },
-              { urls: 'stun:stun1.l.google.com:19302' }
+              { urls: 'stun:stun1.l.google.com:19302' },
+              { urls: 'stun:stun2.l.google.com:19302' },
+              { urls: 'stun:stun3.l.google.com:19302' }
             ]
           },
-          debug: 2
+          debug: 1
         });
 
         peer.on('open', (id) => {
           console.log("Distribuidor conectado com ID:", id);
-          setConnectionStatus('conectado');
+          reconnectAttemptsRef.current = 0; // reset do circuit-breaker ao conectar
+          setConnectionStatus('connected');
+          startKeepalive();
+          
+          knownServers.forEach(serverId => {
+            if (serverId !== id) {
+              console.log(`Auto-conectando ao servidor: ${serverId}`);
+              const conn = peer.connect(serverId);
+              setupConnection(conn);
+            }
+          });
         });
 
         peer.on('connection', (conn) => {
           console.log("Nova conexão recebida de:", conn.peer);
+          
+          if (isHydraModeRef.current) {
+            setupConnection(conn);
+            return;
+          }
+
+          const MAX_SERVER_CONNECTIONS = 200;
+          if (activeConnectionsRef.current.size >= MAX_SERVER_CONNECTIONS) {
+            console.log("Servidor cheio. Rejeitando conexão de:", conn.peer);
+            setTimeout(() => { try { conn.close(); } catch (e) {} }, 500);
+            return;
+          }
+          
           setupConnection(conn);
         });
 
+        // ── Tratamento robusto de erros ──────────────────────────────────
         peer.on('error', (err) => {
-          console.error("Erro no peer:", err);
-          setConnectionStatus('erro');
+          console.error("Erro no peer:", err.type, err);
+
+          // Erros FATAIS: não adianta reconectar com o mesmo ID
+          if (err.type === 'unavailable-id' || err.type === 'invalid-id') {
+            setConnectionStatus('errorIdUnavailable');
+            console.error("ID já em uso ou inválido. Altere o ID e tente novamente.");
+            stopKeepalive();
+            return;
+          }
+
+          // Erros de peer remoto não afetam o servidor em si
+          if (err.type === 'peer-unavailable') {
+            console.warn("Peer remoto indisponível:", err.message);
+            return; // não reconecta – o servidor continua de pé
+          }
+
+          // Erros de REDE / SERVIDOR – reconecta automaticamente
+          setConnectionStatus('error');
+          if (!isManualDisconnectRef.current) {
+            scheduleReconnect();
+          }
         });
 
+        // Sinalização desconectou (não o peer em si) – tenta reconectar
         peer.on('disconnected', () => {
-          console.log("Peer desconectado");
-          setConnectionStatus('desconectado');
+          if (isManualDisconnectRef.current) return;
+          console.log("Peer desconectado do servidor de sinalização. Reconectando...");
+          setConnectionStatus('reconnecting');
+          scheduleReconnect();
+        });
+
+        // Peer completamente fechado (raro, mas tratado)
+        peer.on('close', () => {
+          if (isManualDisconnectRef.current) return;
+          console.warn("Peer fechou completamente. Recriando...");
+          stopKeepalive();
+          peerInstance.current = null;
+          scheduleReconnect();
         });
 
         peerInstance.current = peer;
       };
 
+      // ── Reconecta quando a internet voltar ──────────────────────────────
       useEffect(() => {
-        if (connectionStatus !== 'conectado' && connectionStatus !== 'conectando') return;
-        
-        const checkConnectionInterval = setInterval(() => {
-          if (peerInstance.current && peerInstance.current.disconnected) {
-            console.log("Tentando reconectar...");
-            try {
-              peerInstance.current.reconnect();
-            } catch (e) {
-              console.error("Falha na reconexão, recriando peer:", e);
+        const handleOnline = () => {
+          console.log("Rede online detectada.");
+          if (!isManualDisconnectRef.current) {
+            const p = peerInstance.current;
+            const isOk = p && !p.destroyed && !p.disconnected;
+            if (!isOk) {
+              console.log("Reconectando após retorno da rede...");
+              reconnectAttemptsRef.current = 0;
               setupPeer();
             }
           }
-        }, 30000);
-
-        return () => {
-          clearInterval(checkConnectionInterval);
         };
+        window.addEventListener('online', handleOnline);
+        return () => window.removeEventListener('online', handleOnline);
+      }, [peerId]);
+
+      useEffect(() => {
+        // Monitora saúde da conexão a cada 15s – funciona em TODOS os estados (inclusive 'erro')
+        if (connectionStatus === 'desconectado' || connectionStatus === 'erro-fatal') return;
+        
+        const checkConnectionInterval = setInterval(() => {
+          const p = peerInstance.current;
+
+          // Se estiver no estado 'erro' aguarda o scheduleReconnect atuar
+          if (connectionStatus.startsWith('erro')) return;
+
+          if (p && p.disconnected && !p.destroyed) {
+            console.log("Monitor: peer desconectado, agendando reconexão...");
+            if (!isManualDisconnectRef.current) scheduleReconnect();
+          }
+          
+          // Limpeza de heartbeats antigos (> 45s)
+          const now = Date.now();
+          let changed = false;
+          heartbeatsRef.current.forEach((time, id) => {
+            if (now - time > 45000) { heartbeatsRef.current.delete(id); changed = true; }
+          });
+          if (changed) setStats(prev => ({ ...prev, hydraNodes: heartbeatsRef.current.size }));
+          
+          // Broadcast de estatísticas para todos os conectados
+          const statsMsg = { type: 'network-stats', totalOnline: heartbeatsRef.current.size, timestamp: now };
+          activeConnectionsRef.current.forEach(conn => { try { conn.send(statsMsg); } catch(e) {} });
+          
+        }, 15000);
+
+        return () => clearInterval(checkConnectionInterval);
       }, [connectionStatus]);
 
       const handleIdChange = (newId) => {
         disconnectPeer();
       };
 
+      const broadcastMyYoutubeVideo = () => {
+        const url = prompt('Digite a URL do vídeo do YouTube para transmitir:');
+        if (!url) return;
+        
+        let finalYoutubeId = '';
+        try {
+          const parsedUrl = new URL(url);
+          if (parsedUrl.hostname === 'youtu.be') {
+            finalYoutubeId = parsedUrl.pathname.slice(1);
+          } else if (parsedUrl.hostname.includes('youtube.com')) {
+            if (parsedUrl.pathname === '/playlist') {
+              const list = parsedUrl.searchParams.get('list');
+              if (list) finalYoutubeId = `playlist:${list}`;
+            } else if (parsedUrl.pathname === '/watch') {
+              const v = parsedUrl.searchParams.get('v');
+              const list = parsedUrl.searchParams.get('list');
+              if (list) {
+                finalYoutubeId = `playlist:${list}`;
+              } else if (v) {
+                finalYoutubeId = v;
+              }
+            } else if (parsedUrl.pathname.startsWith('/embed/')) {
+              finalYoutubeId = parsedUrl.pathname.split('/')[2];
+            }
+          }
+        } catch (e) {}
+
+        if (!finalYoutubeId) {
+          const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+          const match = url.match(regExp);
+          if (match && match[2].length === 11) {
+            finalYoutubeId = match[2];
+          }
+        }
+
+        if (!finalYoutubeId) {
+          alert('URL do YouTube inválida');
+          return;
+        }
+
+        const serverId = peerInstance.current ? peerInstance.current.id : 'SERVER';
+        const startTime = Date.now() + 5000; // 5s delay for sync
+        const duration = 300; // 5 minutes limit
+        const radioId = serverId + '_yt_' + Date.now();
+        const msg = { 
+          type: 'radio-youtube-start', 
+          id: radioId + '_start', 
+          radioId,
+          youtubeId: finalYoutubeId, 
+          startTime,
+          duration,
+          sender: serverId,
+          senderName: t(lang, 'serverName'),
+          ttl: 15 
+        };
+        
+        setYoutubeBroadcasts(prev => ({ ...prev, [serverId]: { videoId: finalYoutubeId, senderName: t(lang, 'serverName') } }));
+        distributeMessage(msg, null);
+      };
+
+      const stopMyYoutubeVideo = () => {
+        const pId = peerInstance.current ? peerInstance.current.id : 'SERVER';
+        const msg = { 
+          type: 'radio-youtube-stop', 
+          id: pId + '_stop_yt_video_' + Date.now(), 
+          sender: pId,
+          senderName: t(lang, 'serverName'),
+          ttl: 15 
+        };
+        
+        setYoutubeBroadcasts(prev => {
+          const next = { ...prev };
+          delete next[pId];
+          return next;
+        });
+        distributeMessage(msg, null);
+      };
+
       const handleIncomingData = (data, sourceConn) => {
+        // Handle Heartbeat from any user (even if not directly connected long-term)
+        if (data && data.type === 'heartbeat') {
+          heartbeatsRef.current.set(sourceConn.peer, Date.now());
+          setStats(prev => ({
+            ...prev,
+            hydraNodes: heartbeatsRef.current.size
+          }));
+          
+          // If it's just a heartbeat and we are in Hydra Mode, we can close the connection to save resources
+          if (isHydraModeRef.current) {
+            setTimeout(() => {
+              try { sourceConn.close(); } catch(e) {}
+            }, 1000);
+          }
+          return;
+        }
+
+        // Se estiver no modo Hydra, ignora qualquer mensagem de chat/dados
+        if (isHydraModeRef.current) return;
+
         console.log(`Recebendo dados de ${sourceConn.peer}:`, data);
         
-        setStats(prev => ({
-          ...prev,
-          messagesReceived: prev.messagesReceived + 1
-        }));
-
-        if (data.type === 'message') {
-          const senderName = data.senderName || sourceConn.peer;
-          
-          // Modify the message text to include sender name at the beginning
-          const modifiedData = {
-            ...data,
-            text: `${senderName}: ${data.text}`
-          };
-          
-          const newMessage = {
-            id: Date.now() + Math.random().toString(36).substring(7),
-            text: modifiedData.text,
-            sender: senderName,
-            timestamp: new Date().toISOString(),
-            source: sourceConn.peer
-          };
-          
-          setMessages(prev => [...prev, newMessage]);
-          
-          // Distribute the modified message that includes the sender name
-          distributeMessage(modifiedData, sourceConn.peer);
+        if (data.type === 'pex') {
+          return; // Servidor não precisa processar PEX de clientes
         }
-        else if (data.type === 'file-start' || data.type === 'file-chunk') {
-          console.log("Arquivo recebido, redistribuindo...");
+
+        if (data.type === 'message' || data.type === 'torrent-request') {
+          if (data.id) {
+            if (seenMessagesRef.current.has(data.id)) {
+              console.log(`Servidor: ${data.type} repetido ignorado (Anti-Loop).`);
+              return;
+            }
+            seenMessagesRef.current.add(data.id);
+            if (seenMessagesRef.current.size > 10000) {
+              const firstItem = seenMessagesRef.current.values().next().value;
+              seenMessagesRef.current.delete(firstItem);
+            }
+          }
+
+          if (data.type === 'message') {
+            if (data.text && data.text.length > 500) {
+              console.log("Servidor: Mensagem muito longa ignorada.");
+              return;
+            }
+            setStats(prev => ({
+              ...prev,
+              messagesReceived: prev.messagesReceived + 1
+            }));
+
+            const senderName = data.senderName || sourceConn.peer;
+            
+            const newMessage = {
+              id: data.id || (Date.now() + Math.random().toString(36).substring(7)),
+              text: data.text,
+              sender: senderName,
+              timestamp: new Date().toISOString(),
+              source: sourceConn.peer
+            };
+            
+            setMessages(prev => [...prev, newMessage].slice(-100));
+          }
+          
+          distributeMessage(data, sourceConn.peer);
+        }
+        else if (data.type === 'radio-start' || data.type === 'radio-stream-start' || data.type === 'radio-chunk' || data.type === 'radio-sync' || data.type === 'radio-request-sync' || data.type === 'radio-youtube-start') {
+          if (data.id) {
+            if (seenMessagesRef.current.has(data.id)) return;
+            seenMessagesRef.current.add(data.id);
+          }
+          
+          if (data.type === 'radio-start' || data.type === 'radio-stream-start' || data.type === 'radio-sync') {
+            radioStateRef.current = {
+              status: 'playing',
+              radioType: data.type === 'radio-stream-start' || data.radioType === 'stream' ? 'stream' : 'file',
+              startTime: data.startTime,
+              duration: data.duration,
+              fileName: data.fileName,
+              senderName: data.senderName,
+              streamUrl: data.streamUrl
+            };
+          }
+          
+          // O Servidor também atua como um relay para a rádio
           distributeMessage(data, sourceConn.peer);
         }
         else if (data.type === 'audio-start' || data.type === 'audio-chunk') {
-          console.log("Áudio recebido, redistribuindo...");
+          if (data.type === 'audio-start' && data.audioSize > 2 * 1024 * 1024) {
+            console.log("Servidor: Áudio muito longo ignorado (limite de 1 minuto).");
+            return;
+          }
+          // Servidor agora aceita mensagens de áudio gravado
+          if (data.id) {
+            if (seenMessagesRef.current.has(data.id)) return;
+            seenMessagesRef.current.add(data.id);
+          }
           distributeMessage(data, sourceConn.peer);
+        }
+        else if (data.type === 'file-start' || data.type === 'file-chunk') {
+          console.log("Bloqueado: O servidor agora só repassa mensagens de texto, emojis, torrents e áudio para proteger a banda da rede.");
+        }
+        else if (data.type === 'e2ee-secret' || data.type === 'server-e2ee-invite' || data.type === 'youtube-cam-start' || data.type === 'youtube-cam-stop' || data.type === 'youtube-chat-start' || data.type === 'radio-youtube-start' || data.type === 'radio-youtube-stop') {
+           // Relay para segredos E2EE, YouTube Cam, YouTube Chat e Radio YouTube
+           if (data.id) {
+             if (seenMessagesRef.current.has(data.id)) return;
+             seenMessagesRef.current.add(data.id);
+           }
+           if (data.type === 'youtube-chat-start') {
+             if (youtubeChatIdRef.current) return;
+             setYoutubeChatId(data.youtubeId);
+           }
+           if (data.type === 'radio-youtube-start') {
+             setYoutubeBroadcasts(prev => ({ ...prev, [data.sender || sourceConn.peer]: { videoId: data.youtubeId, senderName: data.senderName } }));
+           }
+           if (data.type === 'radio-youtube-stop') {
+             setYoutubeBroadcasts(prev => {
+               const next = { ...prev };
+               delete next[data.sender || sourceConn.peer];
+               return next;
+             });
+           }
+           distributeMessage(data, sourceConn.peer);
+        }
+        else if (data.type === 'youtube-chat-stop') {
+           // O comando de parar o chat agora é estritamente local
+           // Não repassamos para outros servidores para evitar ataques
+           if (data.id) {
+             if (seenMessagesRef.current.has(data.id)) return;
+             seenMessagesRef.current.add(data.id);
+           }
+           setYoutubeChatId(null);
         }
       };
 
       const distributeMessage = (data, sourceId) => {
         let distributionCount = 0;
         
+        let currentTtl = data.ttl !== undefined ? data.ttl : 8;
+        if (currentTtl <= 0) {
+          console.log("Servidor: Mensagem descartada por TTL = 0");
+          return;
+        }
+        
+        const relayData = { ...data, ttl: currentTtl - 1 };
+        
         activeConnectionsRef.current.forEach((conn, peerId) => {
           if (peerId !== sourceId) {
             try {
               console.log(`Distribuindo mensagem para ${peerId}`);
-              conn.send(data);
+              conn.send(relayData);
               distributionCount++;
             } catch (err) {
               console.error(`Erro ao enviar para ${peerId}:`, err);
@@ -493,15 +1404,85 @@
         conn.on('open', () => {
           console.log(`Conexão estabelecida com ${conn.peer}`);
           
+          if (isHydraModeRef.current) {
+            // MODO HYDRA: Apenas envia a lista de peers e desconecta
+            if (!recentPeersRef.current.includes(conn.peer)) {
+              recentPeersRef.current.push(conn.peer);
+              if (recentPeersRef.current.length > 1000) recentPeersRef.current.shift();
+              
+              setStats(prev => ({
+                ...prev,
+                hydraNodes: recentPeersRef.current.length
+              }));
+            }
+            
+            const peersToSend = recentPeersRef.current.filter(p => p !== conn.peer).slice(-50);
+            
+            try {
+              conn.send({
+                type: 'migrate-to-p2p',
+                peers: peersToSend,
+                message: t(lang, 'hydraModeMessage')
+              });
+            } catch (err) {}
+            
+            // Desconecta após enviar a lista para não pesar o servidor
+            setTimeout(() => {
+              try { conn.close(); } catch(e) {}
+            }, 2000);
+            return;
+          }
+
           activeConnectionsRef.current.set(conn.peer, conn);
           
           setConnections(Array.from(activeConnectionsRef.current.keys()));
           
           setStats(prev => ({
             ...prev,
-            activeConnections: activeConnectionsRef.current.size
+            activeConnections: activeConnectionsRef.current.size,
+            hydraNodes: recentPeersRef.current.length
           }));
+
+          // VERIFICA SE ATINGIU O LIMITE PARA VIRAR HYDRA AUTOMATICAMENTE
+          if (activeConnectionsRef.current.size >= HYDRA_THRESHOLD && !isHydraModeRef.current) {
+            console.log("LIMITE ATINGIDO! Ativando MODO HYDRA: Migrando todos para a Rede Global P2P...");
+            isHydraModeRef.current = true;
+            
+            const allPeers = Array.from(activeConnectionsRef.current.keys());
+            recentPeersRef.current = [...allPeers]; // Salva os peers atuais no cache do Hydra
+            
+            // Avisa todos os conectados para formarem a rede P2P
+            activeConnectionsRef.current.forEach(c => {
+              try {
+                c.send({
+                  type: 'migrate-to-p2p',
+                  peers: allPeers,
+                  message: t(lang, 'serverFullMigration')
+                });
+              } catch (err) {}
+            });
+            
+            // Opcional: O servidor pode fechar as conexões depois de um tempo, 
+            // mas os próprios clientes vão se conectar entre si.
+            // Para garantir que o servidor fique leve, vamos desconectar todos após 5 segundos.
+            setTimeout(() => {
+              activeConnectionsRef.current.forEach(c => {
+                try { c.close(); } catch(e) {}
+              });
+              activeConnectionsRef.current.clear();
+              setConnections([]);
+              setStats(prev => ({ ...prev, activeConnections: 0 }));
+            }, 5000);
+          }
           
+          // Always send handshake from server so clients know it's a central server
+          try {
+            conn.send({ type: 'handshake', peerId });
+            if (youtubeChatIdRef.current) {
+              conn.send({ type: 'youtube-chat-start', id: Date.now() + Math.random().toString(), youtubeId: youtubeChatIdRef.current, ttl: 0 });
+            }
+          } catch (e) {}
+
           // Here is the critical change to ensure we operate in pure server mode:
           // We'll send a special message to mark this as a server connection
           // when pure server mode is enabled
@@ -510,10 +1491,57 @@
               conn.send({
                 type: 'server-info',
                 isServer: true,
-                message: 'Connected to K10 server in pure server mode' 
+                message: t(lang, 'pureServerModeConnected')
               });
             } catch (err) {
               console.error(`Erro ao enviar informação de servidor para ${conn.peer}:`, err);
+            }
+          }
+
+          // Se a rádio estiver tocando, avisa o novato imediatamente
+          if (radioStateRef.current.status === 'playing') {
+            const now = Date.now();
+            if (radioStateRef.current.radioType === 'stream') {
+              try {
+                conn.send({
+                  type: 'radio-sync',
+                  radioType: 'stream',
+                  startTime: radioStateRef.current.startTime,
+                  streamUrl: radioStateRef.current.streamUrl,
+                  fileName: radioStateRef.current.fileName || t(lang, 'globalRadio'),
+                  senderName: radioStateRef.current.senderName || t(lang, 'k10Server')
+                });
+                conn.send({
+                  type: 'message',
+                  text: '#$%',
+                  senderName: t(lang, 'k10Server'),
+                  id: 'radio_block_' + Date.now()
+                });
+              } catch (e) {}
+            } else {
+              const endTime = radioStateRef.current.startTime + radioStateRef.current.duration * 1000;
+              if (now < endTime) {
+                try {
+                  // Envia o radio-sync padrão
+                  conn.send({
+                    type: 'radio-sync',
+                    radioType: 'file',
+                    startTime: radioStateRef.current.startTime,
+                    duration: radioStateRef.current.duration,
+                    fileName: radioStateRef.current.fileName || t(lang, 'globalRadio'),
+                    senderName: radioStateRef.current.senderName || t(lang, 'k10Server')
+                  });
+                  // Envia a string #$% solicitada pelo usuário como fallback de bloqueio
+                  conn.send({
+                    type: 'message',
+                    text: '#$%',
+                    senderName: t(lang, 'k10Server'),
+                    id: 'radio_block_' + Date.now()
+                  });
+                } catch (e) {}
+              } else {
+                radioStateRef.current.status = 'idle';
+              }
             }
           }
         });
@@ -531,7 +1559,8 @@
           
           setStats(prev => ({
             ...prev,
-            activeConnections: activeConnectionsRef.current.size
+            activeConnections: activeConnectionsRef.current.size,
+            hydraNodes: recentPeersRef.current.length
           }));
         });
 
@@ -540,25 +1569,93 @@
         });
       };
 
+      const broadcastYoutubeChat = () => {
+        if (youtubeChatId) { alert(t(lang, 'chatAlreadyActive')); return; }
+        const url = prompt(t(lang, 'enterYoutubeUrl'));
+        if (!url) return;
+        let yId = null;
+        try {
+          let parsedUrl = url;
+          if (!parsedUrl.startsWith('http')) parsedUrl = 'https://' + parsedUrl;
+          if (parsedUrl.includes('youtu.be/')) yId = parsedUrl.split('youtu.be/')[1].split('?')[0];
+          else if (parsedUrl.includes('youtube.com/watch')) yId = new URL(parsedUrl).searchParams.get('v');
+          else if (parsedUrl.includes('youtube.com/live/')) yId = parsedUrl.split('youtube.com/live/')[1].split('?')[0];
+        } catch (e) {}
+        if (!yId) { alert(t(lang, 'invalidYoutubeUrl')); return; }
+        
+        setYoutubeChatId(yId);
+        const msgId = Date.now() + Math.random().toString(36).substring(7);
+        const msgData = { type: 'youtube-chat-start', id: msgId, youtubeId: yId, ttl: 15 };
+        activeConnectionsRef.current.forEach(c => { try { c.send(msgData); } catch(e){} });
+      };
+
+      const stopYoutubeChat = () => {
+        setYoutubeChatId(null);
+      };
+
       return (
         <div>
-          <h1>Servidor K10</h1>
-          <p>The ID consists of 6 alphanumeric characters.</p>
-          <p>More specifically:</p>
-          <p>Letters: A to Z (uppercase only)</p>
-          <p>Numbers: 2 to 9</p>    
+          {showTutorial && <TutorialModal lang={lang} onClose={() => setShowTutorial(false)} />}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <h1 style={{ margin: 0 }}>{t(lang, 'serverTitle')}</h1>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button 
+                onClick={() => setShowTutorial(true)}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  border: '1px solid #1e3a5f',
+                  background: '#1e40af',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                📖 {t(lang, 'tutorial')}
+              </button>
+              <button 
+                onClick={() => setLang(lang === 'en' ? 'pt' : 'en')}
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '12px',
+                  borderRadius: '4px',
+                  border: '1px solid #0369a1',
+                  background: '#0ea5e9',
+                  color: 'white',
+                  cursor: 'pointer',
+                  fontWeight: 'bold'
+                }}
+              >
+                {t(lang, 'language')}
+              </button>
+            </div>
+          </div>
+
+          <p>{t(lang, 'idDescription1')}</p>
+          <p>{t(lang, 'idDescription2')}</p>
+          <p>{t(lang, 'idDescription3')}</p>
+          <p>{t(lang, 'idDescription4')}</p>
+          <div style={{ background: '#f0f9ff', border: '1px solid #bae6fd', padding: '10px', borderRadius: '8px', marginBottom: '15px', fontSize: '13px', color: '#0369a1' }}>
+            <i className="fas fa-info-circle"></i> {t(lang, 'ytChatExplanation')}
+          </div>
           <div className="peer-id-container">
             <div>
               <span 
                 className={`status-indicator status-${
-                  connectionStatus === 'conectado' ? 'online' : 
-                  connectionStatus === 'conectando' ? 'connecting' : 'offline'
+                  connectionStatus === 'connected' ? 'online' : 
+                  connectionStatus === 'connecting' || connectionStatus.startsWith('reconnecting') ? 'connecting' : 'offline'
                 }`}
               ></span>
-              Status: {connectionStatus}
+              {t(lang, 'status')} {t(lang, connectionStatus.split(' ')[0])} {connectionStatus.includes('(') ? connectionStatus.substring(connectionStatus.indexOf('(')) : ''}
               <button onClick={toggleConnection}>
-                {connectionStatus === 'conectado' || connectionStatus === 'conectando' ? 'Desconectar' : 'Conectar'}
+                {connectionStatus === 'connected' || connectionStatus === 'connecting' || connectionStatus.startsWith('reconnecting') ? t(lang, 'disconnect') : t(lang, 'connect')}
               </button>
+              {connectionStatus === 'errorFatal' && (
+                <button onClick={() => { reconnectAttemptsRef.current = 0; isManualDisconnectRef.current = false; setupPeer(); }} style={{ background: '#ef4444', marginLeft: 8 }}>
+                  {t(lang, 'forceReconnect')}
+                </button>
+              )}
             </div>
           </div>
           
@@ -566,41 +1663,112 @@
             peerId={peerId} 
             setPeerId={setPeerId} 
             onSaveId={handleIdChange} 
-            isConnected={connectionStatus === 'conectado' || connectionStatus === 'conectando'}
+            isConnected={connectionStatus === 'connected' || connectionStatus === 'connecting' || connectionStatus.startsWith('reconnecting')}
+            lang={lang}
           />
           
           {/* New component for controlling server mode */}
           <div className="server-mode-container">
-            <strong>Pure Server Mode:</strong>
-            <input 
-              type="checkbox" 
-              checked={pureServerMode} 
-              onChange={(e) => {
-                setPureServerMode(e.target.checked);
-                // If we're changing mode while connected, it's best to disconnect and reconnect
-                if (connectionStatus === 'conectado') {
-                  disconnectPeer();
-                  setTimeout(setupPeer, 500);
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+              <strong>{t(lang, 'pureServerMode')}</strong>
+              <input 
+                type="checkbox" 
+                checked={pureServerMode} 
+                onChange={(e) => {
+                  setPureServerMode(e.target.checked);
+                  if (connectionStatus === 'connected') {
+                    disconnectPeer();
+                    setTimeout(setupPeer, 500);
+                  }
+                }} 
+                id="serverModeCheckbox"
+              />
+              <label htmlFor="serverModeCheckbox">
+                {t(lang, 'activatePureServer')}
+              </label>
+            </div>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button onClick={broadcastYoutubeChat} disabled={Boolean(youtubeChatId)} style={{ backgroundColor: youtubeChatId ? '#cccccc' : '#eab308', cursor: youtubeChatId ? 'not-allowed' : 'pointer', color: youtubeChatId ? '#666666' : 'black' }}>
+                <i className="fab fa-youtube"></i> {t(lang, 'startYoutubeChat')}
+              </button>
+              {youtubeChatId && (
+                <button onClick={stopYoutubeChat} style={{ backgroundColor: '#ef4444' }}>
+                  <i className="fas fa-times"></i> {t(lang, 'stopYoutubeChat')}
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="server-mode-container">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+              <strong>{t(lang, 'connectToOtherServer')}</strong>
+              <input 
+                type="text" 
+                value={newServerId} 
+                onChange={(e) => setNewServerId(e.target.value)} 
+                placeholder={t(lang, 'serverIdPlaceholder')}
+              />
+              <button onClick={() => {
+                if (newServerId && newServerId !== peerId) {
+                  setKnownServers(prev => {
+                    const updated = [...new Set([...prev, newServerId])];
+                    localStorage.setItem('knownServers', JSON.stringify(updated));
+                    return updated;
+                  });
+                  if (peerInstance.current) {
+                    const conn = peerInstance.current.connect(newServerId);
+                    setupConnection(conn);
+                  }
+                  setNewServerId('');
+                } else if (newServerId === peerId) {
+                  alert(t(lang, 'serverSelfAdd'));
                 }
-              }} 
-              id="serverModeCheckbox"
-            />
-            <label htmlFor="serverModeCheckbox">
-              Enable pure server mode (prevents clients from connecting to each other)
-            </label>
+              }}>{t(lang, 'connect')}</button>
+            </div>
+          </div>
+          
+          <div className="server-mode-container">
+            <strong>{t(lang, 'knownServers')}</strong>
+            {knownServers.map(id => (
+              <span key={id} style={{ background: '#e2e8f0', padding: '2px 8px', borderRadius: '4px', margin: '0 5px' }}>
+                {id} <button onClick={() => {
+                  setKnownServers(prev => {
+                    const updated = prev.filter(s => s !== id);
+                    localStorage.setItem('knownServers', JSON.stringify(updated));
+                    return updated;
+                  });
+                }}>x</button>
+              </span>
+            ))}
           </div>
           
           <div className="distribution-stats">
-            <h3>Distribution Statistics</h3>
-            <p>Messages received: {stats.messagesReceived}</p>
-            <p>Distributed messages: {stats.messagesDistributed}</p>
-            <p>Active connections: {stats.activeConnections}</p>
+            <h3>{t(lang, 'distributionStats')}</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>{t(lang, 'messagesReceived')}</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{stats.messagesReceived}</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>{t(lang, 'messagesDistributed')}</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold' }}>{stats.messagesDistributed}</div>
+              </div>
+              <div style={{ background: '#f8fafc', padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+                <div style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>{t(lang, 'activeConnections')}</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#3b82f6' }}>{stats.activeConnections}</div>
+              </div>
+              <div style={{ background: '#f0fdf4', padding: '10px', borderRadius: '8px', border: '1px solid #bbf7d0' }}>
+                <div style={{ fontSize: '10px', color: '#166534', textTransform: 'uppercase' }}>{t(lang, 'hydraWebSize')}</div>
+                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#15803d' }}>{stats.hydraNodes}</div>
+                <div style={{ fontSize: '9px', color: '#166534' }}>{t(lang, 'estimatedP2PNodes')}</div>
+              </div>
+            </div>
           </div>
           
           <div className="connected-peers">
-            <h3>Active Connections ({connections.length})</h3>
+            <h3>{t(lang, 'activeConnections')} ({connections.length})</h3>
             {connections.length === 0 ? (
-              <p>No active connections</p>
+              <p>{t(lang, 'noActiveConnections')}</p>
             ) : (
               <div>
                 {connections.map((peerId, index) => (
@@ -614,17 +1782,17 @@
           </div>
 
           <div style={{ marginTop: '20px' }}>
-            <h3>Messages</h3>
+            <h3>{t(lang, 'messages')}</h3>
             <div style={{ maxHeight: '300px', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
               {messages.length === 0 ? (
-                <p>Nenhuma mensagem recebida</p>
+                <p>{t(lang, 'noMessagesReceived')}</p>
               ) : (
                 <div>
                   {messages.map((msg, index) => (
                     <div key={index} className={`message other`}>
                       <div>{msg.text}</div>
                       <div className="message-source">
-                        Origem: {msg.source} | {new Date(msg.timestamp).toLocaleTimeString()}
+                        {t(lang, 'origin')} {msg.source} | {new Date(msg.timestamp).toLocaleTimeString()}
                       </div>
                     </div>
                   ))}
@@ -639,8 +1807,5 @@
 
     ReactDOM.render(<DistributorApp />, document.getElementById('root'));
   </script>
-</head>
-<body>
-  <div id="root"></div>
 </body>
 </html>
