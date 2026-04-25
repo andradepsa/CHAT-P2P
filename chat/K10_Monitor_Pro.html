@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<script>
+/* K10 — Servidor de sinalização configurado automaticamente */
+window.K10_SIG = {
+  host: 'k10-signaling.onrender.com',
+  port: 443,
+  secure: true,
+  path: '/k10',
+  key: 'k10chat'
+};
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>K10 MONITOR PRO — Export Reports</title>
+<style>
+:root {
+  --bg:    #020810;
+  --bg2:   #060e1a;
+  --bg3:   #0b1828;
+  --cyan:  #00f5ff;
+  --green: #00ff88;
+  --amber: #ffcc00;
+  --red:   #ff3366;
+  --purple:#b060ff;
+  --text:  #8eb8d0;
+  --dim:   #2a4a60;
+  --border:#0a3050;
+  --mono:  'Courier New', monospace;
+  --glow:  0 0 12px #00f5ff44;
+  --glow-g:0 0 12px #00ff8844;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;padding:18px;min-height:100vh;overflow-x:auto}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,245,255,.008) 2px,rgba(0,245,255,.008) 4px);pointer-events:none;z-index:9999}
+.header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid var(--border)}
+h1{color:var(--cyan);font-size:22px;letter-spacing:5px;text-shadow:var(--glow)}
+h1 span.dot{color:var(--green)}
+h1 span.ver{font-size:11px;color:var(--dim);letter-spacing:2px;margin-left:8px}
+.arch-badge{font-size:9px;letter-spacing:2px;color:var(--amber);border:1px solid var(--amber);padding:2px 8px;background:rgba(255,204,0,.07)}
+.bar{display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap}
+.lbl{font-size:10px;letter-spacing:2px;color:var(--cyan)}
+input{background:var(--bg2);border:1px solid var(--border);color:var(--amber);padding:6px 10px;font-family:var(--mono);font-size:13px;outline:none;letter-spacing:2px;width:170px;text-transform:uppercase}
+input::placeholder{text-transform:none;color:var(--dim);font-size:11px}
+button{background:none;border:1px solid;padding:6px 14px;font-family:var(--mono);cursor:pointer;font-size:11px;letter-spacing:1px;transition:.2s}
+.b-start{border-color:var(--cyan);color:var(--cyan)}
+.b-start:hover{background:rgba(0,245,255,.1)}
+.b-stop{border-color:var(--red);color:var(--red)}
+.b-stop:hover{background:rgba(255,51,102,.1)}
+button:disabled{border-color:var(--dim) !important;color:var(--dim) !important;cursor:not-allowed}
+#status{font-size:11px;color:var(--dim);letter-spacing:1px}
+#status.on{color:var(--green)}
+#status.err{color:var(--red)}
+#status.wait{color:var(--amber)}
+#my-id{font-size:10px;color:var(--dim)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.stat{background:var(--bg2);border:1px solid var(--border);padding:12px 16px;border-left:3px solid;position:relative;overflow:hidden}
+.stat::after{content:'';position:absolute;right:-10px;bottom:-10px;width:60px;height:60px;border-radius:50%;opacity:.04}
+.sc{border-left-color:var(--cyan)} .sc::after{background:var(--cyan)}
+.sg{border-left-color:var(--green)} .sg::after{background:var(--green)}
+.sa{border-left-color:var(--amber)} .sa::after{background:var(--amber)}
+.sp{border-left-color:var(--purple)}.sp::after{background:var(--purple)}
+.stat-l{font-size:9px;letter-spacing:2px;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+.stat-v{font-size:26px;font-weight:700;line-height:1;transition:all .3s}
+.sc .stat-v{color:var(--cyan);text-shadow:var(--glow)}
+.sg .stat-v{color:var(--green);text-shadow:var(--glow-g)}
+.sa .stat-v{color:var(--amber)}
+.sp .stat-v{color:var(--purple)}
+.stat-sub{font-size:9px;color:var(--dim);margin-top:3px;letter-spacing:1px}
+.health-panel{background:var(--bg2);border:1px solid var(--border);margin-bottom:16px;padding:12px 16px}
+.health-status{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:12px}
+.health-badge{font-size:14px;font-weight:700;padding:4px 12px;border-radius:20px}
+.health-badge.green{background:#00ff8822;color:#00ff88;border:1px solid #00ff88}
+.health-badge.yellow{background:#ffcc0022;color:#ffcc00;border:1px solid #ffcc00}
+.health-badge.red{background:#ff336622;color:#ff3366;border:1px solid #ff3366}
+.health-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
+.health-card{background:var(--bg3);padding:8px 12px;border-radius:6px}
+.health-card .label{font-size:9px;color:var(--dim);text-transform:uppercase}
+.health-card .value{font-size:20px;font-weight:700;color:var(--cyan)}
+.health-card .trend{font-size:10px;margin-left:8px}
+.trend-up{color:var(--green)}
+.trend-down{color:var(--red)}
+.health-alerts{background:rgba(255,51,102,.1);border-left:3px solid var(--red);padding:8px 12px;margin-bottom:12px;font-size:11px}
+.health-alerts .alert-item{color:var(--red);margin:4px 0}
+.health-table{width:100%;border-collapse:collapse;font-size:10px}
+.health-table th,.health-table td{border-bottom:1px solid var(--border);padding:6px 4px;text-align:left}
+.health-table th{color:var(--cyan);text-transform:uppercase;letter-spacing:1px}
+.slbl{font-size:9px;letter-spacing:3px;color:var(--cyan);margin-bottom:8px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border)}
+.perf-row{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.perf-box{background:var(--bg2);border:1px solid var(--border);padding:6px 12px;font-size:10px;color:var(--dim);display:flex;align-items:center;gap:6px}
+.perf-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.perf-box span{color:var(--green)}
+.groups-wrap{background:var(--bg2);border:1px solid var(--border);margin-bottom:16px}
+.groups-head{display:grid;grid-template-columns:80px 1fr 110px 90px 80px;padding:6px 12px;border-bottom:1px solid var(--border);font-size:9px;letter-spacing:2px;color:var(--dim);text-transform:uppercase}
+#groups-body{max-height:340px;overflow-y:auto;scrollbar-width:thin}
+#groups-body::-webkit-scrollbar{width:4px}
+.gr{display:grid;grid-template-columns:80px 1fr 110px 90px 80px;padding:7px 12px;border-bottom:1px solid rgba(10,48,80,.5);align-items:center}
+.gr:hover{background:rgba(0,245,255,.03)}
+.gid{font-size:12px;font-weight:700;color:var(--green);letter-spacing:2px}
+.gbar-w{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.gbar{height:100%;border-radius:3px;transition:width .6s;background:linear-gradient(90deg,var(--green),var(--cyan))}
+.gcount{color:var(--cyan);font-size:12px;font-weight:700;text-align:right}
+.gdelta{font-size:10px;text-align:right}
+.gdelta.up{color:var(--green)} .gdelta.dn{color:var(--red)} .gdelta.eq{color:var(--dim)}
+.gts{font-size:10px;color:var(--dim);text-align:right}
+#srvlist{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.srv{background:var(--bg2);border:1px solid var(--border);padding:8px 14px;font-size:11px;display:flex;flex-direction:column;gap:3px;min-width:180px}
+.srv-top{display:flex;align-items:center;gap:8px}
+.sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--dim)}
+.sdot.fresh{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 2s infinite}
+.sdot.stale{background:var(--amber)}
+.sdot.dead{background:var(--red)}
+.srv-id{color:var(--amber);font-weight:700;letter-spacing:1px}
+.srv-meta{font-size:9px;color:var(--dim);letter-spacing:1px;display:flex;gap:10px;padding-left:16px}
+.srv-meta span{color:var(--cyan)}
+.hint{border:1px solid var(--border);background:var(--bg2);padding:12px 16px;font-size:11px;color:var(--dim);letter-spacing:.5px;line-height:2}
+.hint b{color:var(--cyan)}
+.hint .h-new{color:var(--green)}
+.hint .h-old{color:var(--dim);text-decoration:line-through}
+.warn{border:1px solid var(--amber);background:rgba(255,204,0,.05);padding:8px 14px;font-size:10px;color:var(--amber);letter-spacing:.5px;margin-bottom:14px;display:none}
+.warn.show{display:block}
+.log-strip{height:60px;overflow-y:auto;background:var(--bg);border:1px solid var(--border);padding:6px 10px;margin-bottom:14px}
+.log-line{font-size:10px;color:var(--dim);line-height:1.6;letter-spacing:.5px}
+.log-line .ts{color:var(--border)}
+.log-line .hi{color:var(--cyan)}
+.log-line .warn-t{color:var(--amber)}
+.log-line .err-t{color:var(--red)}
+.log-line .ok-t{color:var(--green)}
+.empty{color:var(--dim);font-size:11px;padding:14px;letter-spacing:1px;text-align:center}
+.footer{margin-top:18px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;color:var(--dim);letter-spacing:1px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.fi{animation:fi .25s}
+.export-btn{background:var(--cyan);color:#020810;border-color:var(--cyan);margin-left:12px}
+.export-btn:hover{background:#00f5ff44}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>K10<span class="dot">.</span>MONITOR <span class="ver">PRO v3</span></h1>
+    <div style="font-size:9px;color:var(--dim);letter-spacing:2px;margin-top:4px">
+      HEALTH DASHBOARD · 5-LAST REPORTS · EXPORT TXT
+    </div>
+  </div>
+  <div class="arch-badge">▲ MODEL: SERVER-AGGREGATED</div>
+</div>
+
+<div class="bar">
+  <span class="lbl">MONITOR ID ▶</span>
+  <input id="mon-id" value="K10-MON" maxlength="20" spellcheck="false" placeholder="e.g. K10-MON">
+  <button class="b-start" id="btn-start" onclick="startMon()">▶ START</button>
+  <button class="b-stop"  id="btn-stop"  onclick="stopMon()" disabled>■ STOP</button>
+  <span id="status">WAITING</span>
+  <span id="my-id"></span>
+</div>
+
+<div class="perf-row">
+  <div class="perf-box"><div class="perf-dot"></div>Active connections: <span id="p-conns">0</span></div>
+  <div class="perf-box">Renders/s: <span id="p-rps">0</span></div>
+  <div class="perf-box">Messages received: <span id="p-msgs">0</span></div>
+  <div class="perf-box">Memory (groups): <span id="p-mem">0</span></div>
+  <div class="perf-box">Last render: <span id="p-lat">—</span></div>
+</div>
+
+<div class="warn" id="warn-old">
+  ⚠ LEGACY PROTOCOL DETECTED: Individual {t:'u'} payload detected from <span id="warn-src">?</span>.
+  With millions of users this will freeze. Migrate to the aggregated payload {t:'s'}.
+</div>
+
+<div class="stats">
+  <div class="stat sc"><div class="stat-l">TOTAL USERS</div><div class="stat-v" id="s-users">—</div><div class="stat-sub" id="s-users-sub">&nbsp;</div></div>
+  <div class="stat sg"><div class="stat-l">ACTIVE GROUPS</div><div class="stat-v" id="s-groups">—</div><div class="stat-sub" id="s-groups-sub">&nbsp;</div></div>
+  <div class="stat sa"><div class="stat-l">SERVERS</div><div class="stat-v" id="s-srvs">—</div><div class="stat-sub" id="s-srvs-sub">&nbsp;</div></div>
+  <div class="stat sp"><div class="stat-l">PEAK (SESSION)</div><div class="stat-v" id="s-peak">—</div><div class="stat-sub" id="s-peak-sub">&nbsp;</div></div>
+</div>
+
+<!-- HEALTH DASHBOARD -->
+<div class="slbl">🔍 HEALTH CHECK (LAST 5 REPORTS)
+  <button id="exportBtn" class="export-btn" onclick="exportReportsToTxt()" style="margin-left:auto; font-size:9px; padding:4px 10px;">📄 Exportar relatórios (TXT)</button>
+</div>
+<div class="health-panel" id="health-panel">
+  <div class="health-status">
+    <div><span class="health-badge" id="health-badge">⚪ CALCULATING</span></div>
+    <div style="font-size:10px;color:var(--dim)">Auto‑evaluated every 30s</div>
+  </div>
+  <div class="health-metrics" id="health-metrics"></div>
+  <div id="health-alerts" class="health-alerts" style="display:none"></div>
+  <table class="health-table" id="health-table">
+    <thead><tr><th>Timestamp</th><th>Users</th><th>Servers</th><th>Groups</th><th>Avg.Size</th><th>Splits</th><th>Merges</th><th>Comp.</th><th>Tutor</th></tr></thead>
+    <tbody id="health-table-body"></tbody>
+  </table>
+</div>
+
+<div class="slbl">◎ REAL-TIME LOG</div>
+<div class="log-strip" id="log-strip"><div class="log-line"><span class="ts">[--:--:--]</span> System started. Waiting for connections...</div></div>
+
+<div class="slbl">◈ GROUPS <span style="font-size:9px;color:var(--dim)" id="g-count-lbl"></span></div>
+<div class="groups-wrap">
+  <div class="groups-head"><div>GROUP</div><div>OCCUPANCY</div><div style="text-align:right">USERS</div><div style="text-align:right">CHANGE</div><div style="text-align:right">UPDATED</div></div>
+  <div id="groups-body"><div class="empty">Waiting for server reports...</div></div>
+</div>
+
+<div class="slbl">◉ SERVERS <span style="font-size:9px;color:var(--dim)" id="s-count-lbl"></span></div>
+<div id="srvlist"><div class="empty">Waiting for heartbeats...</div></div>
+
+<div class="slbl">▸ PAYLOAD PROTOCOL (NEW vs LEGACY)</div>
+<div class="hint">
+  <b>✔ NEW (scales to billions)</b> — Server reports aggregated totals per group:<br>
+  <b class="h-new">{t:'s', id:'SRV-01', total:150000, groups:{AAAA:5000,BBBB:3200,...}}</b> &nbsp;·&nbsp; every 30s<br>
+  <b>🩺 HEALTH ADDON</b> — Monitor also listens to <b>group‑split, group‑merge, group‑compensate, group‑tutor‑status</b> to compute network health.<br>
+  <b>📄 EXPORT</b> — Click the button above to download the last 5 health reports as .txt file.<br>
+  <br>
+  <b class="h-old">✗ LEGACY (does not scale)</b> — Each user reports individually:<br>
+  {t:'u', id:'K10AAAABB', gid:'AAAA'} &nbsp;·&nbsp; every 30s &nbsp;→ <b style="color:var(--red)">freezes with &gt; 100k users</b>
+</div>
+
+<div class="footer">
+  <span>K10 MONITOR PRO — HEALTH DASHBOARD v3 (Export TXT)</span>
+  <span id="footer-ts">—</span>
+</div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  CONSTANTS
+// ═══════════════════════════════════════════════════════════════════════
+const STALE      = 90_000;
+const FRESH_THR  = 35_000;
+const MAX_GRP    = 1_800;
+const PAGE_ROWS  = 80;
+const RENDER_THR = 1_000;
+const LOG_MAX    = 100;
+const PEER_TIMEOUT = 15000;
+const HEALTH_REPORT_INTERVAL = 30000;
+
+// ═══════════════════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════════════════
+let peer, servers = {}, conns = new Set();
+let prevGroups = {};
+let peakUsers = 0;
+let renderTimer = null, lastRender = 0;
+let msgCount = 0, renderCount = 0, renderCountT = 0;
+let cleanTimer, footerTimer, rpsTimer, healthTimer;
+let logs = [];
+let warnOldSrc = null;
+let legacyBucket = {};
+let isRunning = false;
+
+let splitCounter = 0;
+let mergeCounter = 0;
+let compensateCounter = 0;
+let tutorActiveFlag = false;
+
+let healthReports = []; // até 5
+
+// ═══════════════════════════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════════════════════════
+function fmt(n) {
+  if (n >= 1_000_000_000) return (n/1_000_000_000).toFixed(2)+'B';
+  if (n >= 1_000_000)     return (n/1_000_000).toFixed(2)+'M';
+  if (n >= 1_000)         return (n/1_000).toFixed(1)+'K';
+  return n.toLocaleString('pt-BR');
+}
+function ago(ts) {
+  const s = Math.floor((Date.now()-ts)/1000);
+  return s < 60 ? s+'s' : Math.floor(s/60)+'m';
+}
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function now8() {
+  return new Date().toLocaleTimeString('pt-BR',{hour12:false});
+}
+function setStatus(txt,cls) {
+  const el = document.getElementById('status');
+  if(el){ el.textContent = txt; el.className = cls||''; }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  LOG COM THROTTLE
+// ═══════════════════════════════════════════════════════════════════════
+let logFlushScheduled = false;
+function log(msg, type='') {
+  if (!isRunning && type !== 'warn') return;
+  logs.push({ts:now8(), msg, type});
+  if (logs.length > LOG_MAX) logs.shift();
+  scheduleLogFlush();
+}
+function scheduleLogFlush() {
+  if (logFlushScheduled) return;
+  logFlushScheduled = true;
+  setTimeout(() => {
+    logFlushScheduled = false;
+    flushLog();
+  }, 500);
+}
+function flushLog() {
+  const el = document.getElementById('log-strip');
+  if(!el) return;
+  el.innerHTML = logs.slice(-30).map(l => {
+    let cls = '';
+    if (l.type==='ok') cls='ok-t';
+    else if (l.type==='warn') cls='warn-t';
+    else if (l.type==='err') cls='err-t';
+    else cls='hi';
+    return `<div class="log-line"><span class="ts">[${l.ts}]</span> <span class="${cls}">${esc(l.msg)}</span></div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  AGREGAÇÃO
+// ═══════════════════════════════════════════════════════════════════════
+function deriveGroups() {
+  const g = {};
+  const now = Date.now();
+  for (const sid in servers) {
+    const s = servers[sid];
+    if (now - s.ts > STALE) continue;
+    for (const gid in s.groups) {
+      if (!g[gid]) g[gid] = {n:0, ts:0};
+      g[gid].n  += s.groups[gid];
+      if (s.ts > g[gid].ts) g[gid].ts = s.ts;
+    }
+  }
+  for (const gid in legacyBucket) {
+    const lb = legacyBucket[gid];
+    if (now - lb.ts > STALE) { delete legacyBucket[gid]; continue; }
+    if (!g[gid]) g[gid] = {n:0, ts:0};
+    g[gid].n  += lb.n;
+    if (lb.ts > g[gid].ts) g[gid].ts = lb.ts;
+  }
+  return g;
+}
+
+function totalUsers() {
+  const now = Date.now();
+  let t = 0;
+  for (const sid in servers) if (now - servers[sid].ts <= STALE) t += (servers[sid].total || 0);
+  for (const gid in legacyBucket) if (now - legacyBucket[gid].ts <= STALE) t += legacyBucket[gid].n;
+  return t;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  HEALTH SNAPSHOT
+// ═══════════════════════════════════════════════════════════════════════
+function takeHealthSnapshot() {
+  const groups = deriveGroups();
+  const gkeys = Object.keys(groups);
+  const total = totalUsers();
+  const svcount = Object.keys(servers).filter(sid => (Date.now() - servers[sid].ts) <= STALE).length;
+  const avgSize = gkeys.length ? Math.round(total / gkeys.length) : 0;
+
+  const report = {
+    ts: Date.now(),
+    totalUsers: total,
+    totalServers: svcount,
+    totalGroups: gkeys.length,
+    avgGroupSize: avgSize,
+    splits: splitCounter,
+    merges: mergeCounter,
+    compensates: compensateCounter,
+    tutorActive: tutorActiveFlag
+  };
+
+  healthReports.unshift(report);
+  if (healthReports.length > 5) healthReports.pop();
+
+  splitCounter = 0;
+  mergeCounter = 0;
+  compensateCounter = 0;
+  tutorActiveFlag = false;
+
+  updateHealthUI();
+  log(`📊 Health snapshot: ${total} users, ${svcount} servers, ${gkeys.length} groups, splits:${report.splits}, merges:${report.merges}, comp:${report.compensates}`, 'ok');
+}
+
+function updateHealthUI() {
+  if (healthReports.length === 0) return;
+
+  const latest = healthReports[0];
+  const previous = healthReports[1];
+
+  let userTrend = 0, serverTrend = 0, groupTrend = 0;
+  if (previous) {
+    userTrend = ((latest.totalUsers - previous.totalUsers) / (previous.totalUsers || 1)) * 100;
+    serverTrend = ((latest.totalServers - previous.totalServers) / (previous.totalServers || 1)) * 100;
+    groupTrend = ((latest.totalGroups - previous.totalGroups) / (previous.totalGroups || 1)) * 100;
+  }
+
+  let healthStatus = 'green';
+  let statusText = '🟢 SAUDÁVEL';
+  const alerts = [];
+
+  if (userTrend < -30) {
+    healthStatus = 'red';
+    alerts.push(`🔴 Queda brusca de usuários: ${userTrend.toFixed(1)}% em 30s`);
+  }
+  if (latest.splits + latest.merges > 5) {
+    if (healthStatus !== 'red') healthStatus = 'yellow';
+    alerts.push(`🟡 Alta atividade de splits/merges (${latest.splits}/${latest.merges}) → possível instabilidade`);
+  }
+  if (serverTrend < -30) {
+    if (healthStatus !== 'red') healthStatus = 'yellow';
+    alerts.push(`🟡 Queda de servidores: ${serverTrend.toFixed(1)}% em 30s`);
+  }
+  if (latest.tutorActive) {
+    if (healthStatus === 'green') healthStatus = 'yellow';
+    alerts.push(`⚕️ Grupo em fase de tutela (crescimento) → atenção, mas normal`);
+  }
+  if (latest.totalServers === 0) {
+    healthStatus = 'red';
+    alerts.push(`❌ Nenhum servidor reportando heartbeat! Rede indisponível.`);
+  }
+  if (latest.avgGroupSize < 100 && latest.totalGroups > 3) {
+    if (healthStatus !== 'red') healthStatus = 'yellow';
+    alerts.push(`📉 Média de usuários por grupo muito baixa (${latest.avgGroupSize}) → possível fragmentação`);
+  }
+
+  if (healthStatus === 'green') statusText = '🟢 SAUDÁVEL';
+  else if (healthStatus === 'yellow') statusText = '🟡 ATENÇÃO';
+  else statusText = '🔴 CRÍTICO';
+
+  document.getElementById('health-badge').className = `health-badge ${healthStatus}`;
+  document.getElementById('health-badge').innerHTML = statusText;
+
+  const metricsHtml = `
+    <div class="health-card"><div class="label">USERS (trend)</div><div class="value">${fmt(latest.totalUsers)} <span class="trend ${userTrend>=0?'trend-up':'trend-down'}">${userTrend>=0?'▲':'▼'}${Math.abs(userTrend).toFixed(1)}%</span></div></div>
+    <div class="health-card"><div class="label">SERVERS</div><div class="value">${latest.totalServers} <span class="trend ${serverTrend>=0?'trend-up':'trend-down'}">${serverTrend>=0?'▲':'▼'}${Math.abs(serverTrend).toFixed(1)}%</span></div></div>
+    <div class="health-card"><div class="label">GROUPS</div><div class="value">${latest.totalGroups} <span class="trend ${groupTrend>=0?'trend-up':'trend-down'}">${groupTrend>=0?'▲':'▼'}${Math.abs(groupTrend).toFixed(1)}%</span></div></div>
+    <div class="health-card"><div class="label">AVG GROUP SIZE</div><div class="value">${fmt(latest.avgGroupSize)}</div></div>
+    <div class="health-card"><div class="label">SPLITS/MERGES</div><div class="value">${latest.splits} / ${latest.merges}</div></div>
+  `;
+  document.getElementById('health-metrics').innerHTML = metricsHtml;
+
+  const alertsDiv = document.getElementById('health-alerts');
+  if (alerts.length) {
+    alertsDiv.style.display = 'block';
+    alertsDiv.innerHTML = alerts.map(a => `<div class="alert-item">⚠️ ${a}</div>`).join('');
+  } else {
+    alertsDiv.style.display = 'none';
+  }
+
+  const tbody = document.getElementById('health-table-body');
+  tbody.innerHTML = healthReports.map(r => `
+    <tr>
+      <td>${new Date(r.ts).toLocaleTimeString()}】--
+      <td>${fmt(r.totalUsers)}】--
+      <td>${r.totalServers}】--
+      <td>${r.totalGroups}】--
+      <td>${fmt(r.avgGroupSize)}】--
+      <td>${r.splits}】--
+      <td>${r.merges}】--
+      <td>${r.compensates}】--
+      <td>${r.tutorActive ? '⚕️ sim' : 'não'}】--
+    </tr>
+  `).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  EXPORTAR RELATÓRIOS PARA TXT
+// ═══════════════════════════════════════════════════════════════════════
+window.exportReportsToTxt = function() {
+  if (healthReports.length === 0) {
+    alert("Nenhum relatório disponível ainda. Aguarde o monitor coletar dados.");
+    return;
+  }
+
+  let content = "K10 MONITOR PRO — HEALTH REPORT EXPORT\n";
+  content += `Exportado em: ${new Date().toLocaleString()}\n`;
+  content += `Monitor ID: ${document.getElementById('mon-id').value.trim().toUpperCase() || 'K10-MON'}\n`;
+  content += `Status: ${document.getElementById('status').innerText}\n`;
+  content += `Conexões ativas: ${conns.size}\n`;
+  content += `Total de mensagens recebidas: ${msgCount}\n`;
+  content += `Último render: ${document.getElementById('p-lat').innerText}\n`;
+  content += `\n${'='.repeat(80)}\n`;
+  content += `ÚLTIMOS 5 RELATÓRIOS DE SAÚDE (mais recente primeiro)\n`;
+  content += `${'='.repeat(80)}\n\n`;
+
+  healthReports.forEach((r, idx) => {
+    content += `📌 RELATÓRIO #${idx+1} (${new Date(r.ts).toLocaleString()})\n`;
+    content += `   Usuários totais  : ${fmt(r.totalUsers)} (${r.totalUsers.toLocaleString()} exato)\n`;
+    content += `   Servidores ativos: ${r.totalServers}\n`;
+    content += `   Grupos ativos    : ${r.totalGroups}\n`;
+    content += `   Tamanho médio    : ${fmt(r.avgGroupSize)}\n`;
+    content += `   Splits           : ${r.splits}\n`;
+    content += `   Merges           : ${r.merges}\n`;
+    content += `   Compensações     : ${r.compensates}\n`;
+    content += `   Tutela ativa     : ${r.tutorActive ? 'Sim (grupo filho em crescimento)' : 'Não'}\n\n`;
+  });
+
+  if (healthReports.length >= 2) {
+    const latest = healthReports[0];
+    const prev = healthReports[1];
+    const userDelta = ((latest.totalUsers - prev.totalUsers) / (prev.totalUsers || 1)) * 100;
+    const serverDelta = ((latest.totalServers - prev.totalServers) / (prev.totalServers || 1)) * 100;
+    const groupDelta = ((latest.totalGroups - prev.totalGroups) / (prev.totalGroups || 1)) * 100;
+    content += `📈 TENDÊNCIAS (último vs penúltimo):\n`;
+    content += `   Usuários : ${userDelta>=0?'+':''}${userDelta.toFixed(2)}%\n`;
+    content += `   Servidores: ${serverDelta>=0?'+':''}${serverDelta.toFixed(2)}%\n`;
+    content += `   Grupos   : ${groupDelta>=0?'+':''}${groupDelta.toFixed(2)}%\n\n`;
+  }
+
+  const alertsDiv = document.getElementById('health-alerts');
+  if (alertsDiv && alertsDiv.style.display !== 'none') {
+    content += `⚠️ ALERTAS ATUAIS:\n`;
+    const alerts = Array.from(alertsDiv.querySelectorAll('.alert-item')).map(a => a.innerText);
+    alerts.forEach(a => content += `   ${a}\n`);
+    content += `\n`;
+  }
+
+  content += `${'='.repeat(80)}\n`;
+  content += `FIM DO RELATÓRIO\n`;
+
+  const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.download = `k10_health_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.txt`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+  log(`📄 Relatório exportado com ${healthReports.length} registros.`, 'ok');
+};
+
+// ═══════════════════════════════════════════════════════════════════════
+//  PROCESSAMENTO DE MENSAGENS
+// ═══════════════════════════════════════════════════════════════════════
+function handleMsg(msg) {
+  msgCount++;
+  if (!msg || !msg.t) return;
+
+  if (msg.t === 's' && msg.id) {
+    const isNew = !servers[msg.id];
+    servers[msg.id] = { ts: Date.now(), total: msg.total || 0, groups: msg.groups || {} };
+    if (isNew) log(`Novo servidor: ${msg.id} (${fmt(msg.total||0)} usuários)`, 'ok');
+    else log(`Heartbeat: ${msg.id} — ${fmt(msg.total||0)} usuários, ${Object.keys(msg.groups||{}).length} grupos`);
+    scheduleRender();
+    return;
+  }
+
+  if (msg.t === 'u' && msg.id && msg.gid) {
+    if (!warnOldSrc) {
+      warnOldSrc = msg.id;
+      document.getElementById('warn-src').textContent = msg.id;
+      document.getElementById('warn-old').classList.add('show');
+      log(`⚠ Protocolo legado detectado: ${msg.id} → migre para {t:'s'}`, 'warn');
+    }
+    if (!legacyBucket[msg.gid]) legacyBucket[msg.gid] = {n:0, ts:0};
+    legacyBucket[msg.gid].n++;
+    legacyBucket[msg.gid].ts = Date.now();
+    scheduleRender();
+    return;
+  }
+
+  if (msg.type === 'group-split') {
+    splitCounter++;
+    log(`[TOPOLOGY] group-split: ${msg.oldGroupId} → ${msg.newGroupId}`, 'warn');
+    scheduleRender();
+    return;
+  }
+  if (msg.type === 'group-merge') {
+    mergeCounter++;
+    log(`[TOPOLOGY] group-merge: ${msg.absorbedGroupId} → ${msg.survivingGroupId}`, 'warn');
+    scheduleRender();
+    return;
+  }
+  if (msg.type === 'group-compensate') {
+    compensateCounter++;
+    log(`[TOPOLOGY] group-compensate: ${msg.donorGid} → ${msg.receiverGid}`, 'info');
+    scheduleRender();
+    return;
+  }
+  if (msg.type === 'group-tutor-status') {
+    if (msg.active === true) tutorActiveFlag = true;
+    log(`[TOPOLOGY] group-tutor-status: ${msg.childGid} active=${msg.active}`, 'info');
+    scheduleRender();
+    return;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════════════
+function scheduleRender() {
+  if (renderTimer) return;
+  const delay = Math.max(0, lastRender + RENDER_THR - Date.now());
+  renderTimer = setTimeout(() => {
+    renderTimer = null;
+    lastRender = Date.now();
+    render();
+  }, delay);
+}
+
+function render() {
+  const t0 = performance.now();
+  const groups = deriveGroups();
+  const gkeys = Object.keys(groups).sort((a,b)=>groups[b].n - groups[a].n);
+  const total = totalUsers();
+  const skeys = Object.keys(servers).filter(sid => (Date.now() - servers[sid].ts) <= STALE);
+  const now = Date.now();
+
+  renderCount++; renderCountT++;
+  if (total > peakUsers) peakUsers = total;
+
+  document.getElementById('s-users').textContent = total > 0 ? fmt(total) : '—';
+  document.getElementById('s-groups').textContent = gkeys.length || '—';
+  document.getElementById('s-srvs').textContent = skeys.length || '—';
+  document.getElementById('s-peak').textContent = peakUsers > 0 ? fmt(peakUsers) : '—';
+  document.getElementById('s-users-sub').textContent = total > 0 ? total.toLocaleString('pt-BR')+' exato' : '';
+  document.getElementById('s-groups-sub').textContent = gkeys.length > 0 ? 'grupos únicos' : '';
+  document.getElementById('s-srvs-sub').textContent = skeys.length > 0 ? 'online' : '';
+  document.getElementById('s-peak-sub').textContent = peakUsers > 0 ? 'sessão atual' : '';
+
+  document.getElementById('g-count-lbl').textContent = gkeys.length > PAGE_ROWS ? `(exibindo top ${PAGE_ROWS} de ${gkeys.length})` : (gkeys.length > 0 ? `(${gkeys.length} grupos)` : '');
+  const visible = gkeys.slice(0, PAGE_ROWS);
+  document.getElementById('groups-body').innerHTML = visible.length ? visible.map(gid => {
+    const g = groups[gid];
+    const pct = Math.min(100, (g.n / MAX_GRP) * 100).toFixed(1);
+    const prev = prevGroups[gid] ? prevGroups[gid].n : null;
+    let delta = '', deltaClass = 'eq';
+    if (prev !== null) {
+      const d = g.n - prev;
+      if (d > 0) { delta = '+'+fmt(d); deltaClass = 'up'; }
+      else if (d < 0) { delta = fmt(d); deltaClass = 'dn'; }
+      else { delta = '='; deltaClass = 'eq'; }
+    }
+    return `<div class="gr"><div class="gid">${esc(gid)}</div><div class="gbar-w"><div class="gbar" style="width:${pct}%"></div></div><div class="gcount">${fmt(g.n)}</div><div class="gdelta ${deltaClass}">${delta}</div><div class="gts">${ago(g.ts)}</div></div>`;
+  }).join('') : '<div class="empty">Aguardando relatórios dos servidores...</div>';
+
+  prevGroups = JSON.parse(JSON.stringify(groups));
+
+  document.getElementById('s-count-lbl').textContent = skeys.length > 0 ? `(${skeys.length} online)` : '';
+  document.getElementById('srvlist').innerHTML = skeys.length ? skeys.map(sid => {
+    const s = servers[sid];
+    const diff = now - s.ts;
+    const cls = diff < FRESH_THR ? 'fresh' : diff < STALE ? 'stale' : 'dead';
+    const gNum = Object.keys(s.groups||{}).length;
+    return `<div class="srv fi"><div class="srv-top"><div class="sdot ${cls}"></div><span class="srv-id">${esc(sid)}</span></div><div class="srv-meta"><div>usuários: <span>${fmt(s.total||0)}</span></div><div>grupos: <span>${gNum}</span></div><div>há: <span>${ago(s.ts)}</span></div></div></div>`;
+  }).join('') : '<div class="empty">Aguardando heartbeats dos servidores...</div>';
+
+  document.getElementById('p-mem').textContent = gkeys.length;
+  document.getElementById('p-lat').textContent = (performance.now()-t0).toFixed(1)+'ms';
+  document.getElementById('p-conns').textContent = conns.size;
+  document.getElementById('p-msgs').textContent = msgCount.toLocaleString('pt-BR');
+  document.getElementById('footer-ts').textContent = 'UPD: '+now8();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+//  START / STOP (REAL MODE ONLY, NO DEMO)
+// ═══════════════════════════════════════════════════════════════════════
+function startMon() {
+  if (isRunning) stopMon();
+  const id = document.getElementById('mon-id').value.trim().toUpperCase() || 'K10-MON';
+  setStatus('CONECTANDO...', 'wait');
+  log(`Iniciando monitor como: ${id}`, 'hi');
+
+  if (!window.RTCPeerConnection) {
+    setStatus('ERRO: WebRTC não suportado', 'err');
+    log("❌ WebRTC não suportado neste navegador. Monitor não pode operar.", "err");
+    return;
+  }
+
+  let connectionTimeout = setTimeout(() => {
+    if (peer && !peer.destroyed && !peer.open) {
+      setStatus('ERRO: TIMEOUT', 'err');
+      log("❌ Timeout PeerJS. Servidor: k10-signaling.onrender.com", "err");
+      if (peer && !peer.destroyed) peer.destroy();
+      peer = null;
+    }
+  }, PEER_TIMEOUT);
+
+  peer = new Peer(id, { ...window.K10_SIG, debug:0, config:{ iceServers: [{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun.stunprotocol.org:3478'}] } });
+
+  peer.on('open', pid => {
+    clearTimeout(connectionTimeout);
+    setStatus('● ONLINE', 'on');
+    document.getElementById('my-id').textContent = 'ID: '+pid;
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-stop').disabled = false;
+    log(`Monitor online: ${pid}`, 'ok');
+    isRunning = true;
+    healthTimer = setInterval(() => takeHealthSnapshot(), HEALTH_REPORT_INTERVAL);
+  });
+
+  peer.on('connection', conn => {
+    conns.add(conn.peer);
+    log(`Conexão: ${conn.peer}`);
+    document.getElementById('p-conns').textContent = conns.size;
+    conn.on('data', data => handleMsg(data));
+    conn.on('close', () => { conns.delete(conn.peer); log(`Desconectado: ${conn.peer}`, 'warn'); document.getElementById('p-conns').textContent = conns.size; });
+    conn.on('error', e => log(`Erro conn: ${e.message}`, 'err'));
+  });
+
+  peer.on('error', e => {
+    clearTimeout(connectionTimeout);
+    setStatus('ERRO: '+e.type, 'err');
+    log(`Erro peer: ${e.type}`, 'err');
+    if (e.type === 'peer-unavailable') {
+      log(`⚠️ Monitor ID '${id}' não está acessível ou servidor PeerJS offline.`, 'warn');
+    }
+  });
+
+  cleanTimer = setInterval(() => {
+    const now = Date.now();
+    let changed = false;
+    for (const k in servers) if (now-servers[k].ts > STALE) { delete servers[k]; changed=true; log(`Servidor removido (timeout): ${k}`, 'warn'); }
+    for (const k in legacyBucket) if (now-legacyBucket[k].ts > STALE) { delete legacyBucket[k]; changed=true; }
+    if (changed) scheduleRender();
+  }, 30_000);
+
+  rpsTimer = setInterval(() => {
+    document.getElementById('p-rps').textContent = renderCountT;
+    renderCountT = 0;
+  }, 1000);
+
+  footerTimer = setInterval(() => {
+    document.getElementById('footer-ts').textContent = 'UPD: '+now8();
+  }, 1000);
+}
+
+function stopMon() {
+  isRunning = false;
+  clearInterval(cleanTimer);
+  clearInterval(rpsTimer);
+  clearInterval(footerTimer);
+  clearInterval(healthTimer);
+  clearTimeout(renderTimer);
+  renderTimer = null;
+  if (peer && !peer.destroyed) peer.destroy();
+  peer = null;
+  servers = {}; legacyBucket = {}; prevGroups = {};
+  conns.clear(); msgCount = 0; peakUsers = 0; warnOldSrc = null;
+  splitCounter = 0; mergeCounter = 0; compensateCounter = 0; tutorActiveFlag = false;
+  healthReports = [];
+  setStatus('PARADO', '');
+  document.getElementById('my-id').textContent = '';
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-stop').disabled  = true;
+  document.getElementById('warn-old').classList.remove('show');
+  log('Monitor parado.', 'warn');
+  render();
+  updateHealthUI();
+}
+
+window.addEventListener('unhandledrejection', event => {
+  log(`[Promise Rejection] ${event.reason?.message || event.reason}`, 'err');
+  event.preventDefault();
+});
+
+render();
+</script>
+</body>
+</html>
